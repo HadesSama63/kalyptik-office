@@ -43,6 +43,24 @@ jobs:
           sudo docker image prune --all --force
           df -h /
 
+      # Le disque système ne suffit pas à compiler V8 + le cœur C++ : Docker
+      # travaille sur le second disque de la machine (/mnt, ~70 Go), avec une
+      # mémoire d'appoint (swap) pour les éditions de liens gourmandes.
+      - name: Déplacer Docker sur /mnt et ajouter du swap
+        run: |
+          sudo systemctl stop docker docker.socket
+          sudo mkdir -p /mnt/docker
+          echo '{"data-root": "/mnt/docker"}' | sudo tee /etc/docker/daemon.json
+          sudo systemctl start docker
+          sudo swapoff -a || true
+          sudo fallocate -l 16G /mnt/kalyptik.swap
+          sudo chmod 600 /mnt/kalyptik.swap
+          sudo mkswap /mnt/kalyptik.swap
+          sudo swapon /mnt/kalyptik.swap
+          docker info --format 'Docker root: {{.DockerRootDir}}'
+          df -h / /mnt
+          free -h
+
       - uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -106,6 +124,24 @@ jobs:
                       /opt/hostedtoolcache/CodeQL /usr/local/share/boost /usr/share/swift
           sudo docker image prune --all --force
           df -h /
+
+      # Le disque système ne suffit pas à compiler V8 + le cœur C++ : Docker
+      # travaille sur le second disque de la machine (/mnt, ~70 Go), avec une
+      # mémoire d'appoint (swap) pour les éditions de liens gourmandes.
+      - name: Déplacer Docker sur /mnt et ajouter du swap
+        run: |
+          sudo systemctl stop docker docker.socket
+          sudo mkdir -p /mnt/docker
+          echo '{"data-root": "/mnt/docker"}' | sudo tee /etc/docker/daemon.json
+          sudo systemctl start docker
+          sudo swapoff -a || true
+          sudo fallocate -l 16G /mnt/kalyptik.swap
+          sudo chmod 600 /mnt/kalyptik.swap
+          sudo mkswap /mnt/kalyptik.swap
+          sudo swapon /mnt/kalyptik.swap
+          docker info --format 'Docker root: {{.DockerRootDir}}'
+          df -h / /mnt
+          free -h
 
       - uses: actions/checkout@v4
         with:

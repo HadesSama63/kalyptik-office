@@ -29,6 +29,7 @@ jobs:
   #              (euro-office → GitHub Release, nextcloud-office → SSH)
   # ─────────────────────────────────────────────────────────────
   build-common:
+    if: github.repository_owner == 'Euro-Office'   # Kalyptik: désactivé hors Euro-Office
     runs-on: 'ubuntu-latest'
     permissions:
       contents: write
@@ -166,6 +167,7 @@ jobs:
 
 
   crosscompile-3rdparty-arm64:
+    if: github.repository_owner == 'Euro-Office'   # Kalyptik: désactivé hors Euro-Office
     runs-on: windows-2022                 # x64 host that cross-compiles to arm64
     env:
       PYTHONUTF8: "1"

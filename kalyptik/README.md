@@ -17,9 +17,12 @@ facilement les futures versions, on respecte une règle simple :
 | `kalyptik/modules/`    | modules ajoutés (plugins des éditeurs)                     |
 | `kalyptik/scripts/`    | outils (synchronisation avec Euro-Office, application du thème) |
 
-Le `README.md` racine d'Euro-Office n'est **pas**
-modifié ; seuls des fichiers *nouveaux* sont ajoutés (`kalyptik/`,
-`.github/workflows/kalyptik-*.yml`), donc les mises à jour ne génèrent pas de conflit.
+Les fichiers d'Euro-Office ne sont pas modifiés ; on ajoute des fichiers
+*nouveaux* (`kalyptik/`, `.github/workflows/kalyptik-*.yml`), donc les mises à
+jour ne génèrent pas de conflit. Seule exception : une ligne
+`if: github.repository_owner == 'Euro-Office'` dans `build.yml` et `winget.yml`
+pour que ces workflows d'Euro-Office (qui ont besoin de leurs secrets, ou qui
+publieraient sur winget sous leur nom) ne tournent pas chez nous.
 
 ## Récupérer les mises à jour d'Euro-Office
 

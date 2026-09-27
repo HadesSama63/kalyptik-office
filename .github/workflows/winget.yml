@@ -4,6 +4,7 @@ on:
     types: [released]
 jobs:
   publish:
+    if: github.repository_owner == 'Euro-Office'   # Kalyptik: désactivé hors Euro-Office
     runs-on: windows-latest
     steps:
       - name: Publish to WinGet

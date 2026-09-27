@@ -45,10 +45,15 @@ L'application charge automatiquement les thèmes JSON du dossier
 
 ## Correctifs — `kalyptik/patches/`
 
-Deux modifications minimes du code d'Euro-Office, appliquées au build par
+Modifications minimes du code d'Euro-Office, appliquées au build par
 `kalyptik/scripts/apply-kalyptik.sh` :
 
 - `web-apps/0001-custom-theme-icon-set.patch` : un thème personnalisé peut
   utiliser le jeu d'icônes moderne (`"icons": {"cls": "mod2"}`).
 - `desktop-apps/0001-default-kalyptik-light-theme.patch` : Kalyptik Clair est
   le thème au premier lancement (si le fichier manque : thème système).
+- `desktop-apps/0002-install-uithemes.patch` : installe les thèmes à côté de l'exécutable.
+- `core/0001-v8-depot-tools-lru-cache.patch` : correctif de build (pas de marque).
+  Le correctif V8 d'Euro-Office ne s'applique plus aux versions récentes des
+  outils Google ; celui-ci fait la même chose de façon robuste. Euro-Office n'est
+  pas touché car il télécharge V8 déjà compilé depuis un cache privé.

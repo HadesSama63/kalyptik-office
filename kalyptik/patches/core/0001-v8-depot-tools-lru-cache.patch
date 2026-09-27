@@ -1,0 +1,21 @@
+diff --git a/Common/3dParty/v8/nc-build.py b/Common/3dParty/v8/nc-build.py
+index dcc2a057..95564235 100644
+--- a/Common/3dParty/v8/nc-build.py
++++ b/Common/3dParty/v8/nc-build.py
+@@ -39,8 +39,15 @@ def check_prequisites():
+ def apply_patches():
+     patches_dir = script_dir / "tools" / "8.9" / "x64-linux-dynamic"
+ 
++    # gclient_paths.patch only strips @functools.lru_cache decorators, but it no
++    # longer applies to current depot_tools (which gclient updates itself), so
++    # strip them directly: works whatever the depot_tools version.
++    gclient_paths = depot_tools_path / "gclient_paths.py"
++    if gclient_paths.is_file():
++        gclient_paths.write_text( re.sub( r"^@functools\.lru_cache(\(.*\))?[ \t]*$", "",
++                                          gclient_paths.read_text(), flags = re.M ) )
++
+     patches = [
+-        { "name": "gclient_paths.patch", "dir": depot_tools_path },
+         { "name": "jinja2.patch", "dir": v8_src_path / "third_party" / "jinja2" },
+         { "name": "buildgn.patch", "dir": v8_src_path },
+     ]

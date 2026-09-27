@@ -1,0 +1,49 @@
+name: Kalyptik - Sync Euro-Office
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'   # chaque lundi
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fusionner Euro-Office dans une branche de synchro
+        id: merge
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add upstream https://github.com/Euro-Office/DesktopEditors.git
+          git fetch upstream main
+          if git merge-base --is-ancestor upstream/main HEAD; then
+            echo "Déjà à jour."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git checkout -B sync/euro-office
+          if ! git merge --no-edit -m "Sync Euro-Office (main)" upstream/main; then
+            echo "Conflit de fusion : à résoudre manuellement avec kalyptik/scripts/sync-upstream.sh" >&2
+            exit 1
+          fi
+          git push --force origin sync/euro-office
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Ouvrir la Pull Request
+        if: steps.merge.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$(gh pr list --head sync/euro-office --state open --json number -q '.[].number')" ]; then
+            gh pr create --head sync/euro-office --base "${{ github.event.repository.default_branch }}" \
+              --title "Sync Euro-Office" \
+              --body "Intégration automatique des dernières modifications d'Euro-Office DesktopEditors."
+          fi

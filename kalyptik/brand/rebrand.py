@@ -14,6 +14,7 @@ Ce qui ne change PAS, volontairement :
 - le nom de l'exécutable (DesktopEditors) et l'identifiant d'association « ASC.Editors »,
   sur lesquels reposent les mises à jour et les associations de fichiers ;
 - le protocole « oo-office:// » utilisé par les connecteurs cloud (Nextcloud…).
+Le site affiché (fenêtre « À propos », installeur Windows) est SITE.
 """
 import sys
 from pathlib import Path
@@ -21,6 +22,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 SUITE = "Kalyptik Office"
+SITE = "https://kalyptik.com"
 
 DEFINES = "desktop-apps/win-linux/src/defines.h"
 VERSION = "desktop-apps/win-linux/src/version.h"
@@ -45,6 +47,8 @@ RULES = [
     (DEFINES, '#define APP_USER_MODEL_ID "ASC.Documents.5"', '#define APP_USER_MODEL_ID "Kalyptik.Office.1"'),
     (DEFINES, '#define APP_SIMPLE_WINDOW_TITLE "Euro-Office Editor"', f'#define APP_SIMPLE_WINDOW_TITLE "{SUITE}"'),
     (DEFINES, '#define FILE_PREFIX "eurooffice_"', '#define FILE_PREFIX "kalyptik_"'),
+    (DEFINES, '#define URL_SITE                "https://github.com/Euro-Office"',
+              f'#define URL_SITE                "{SITE}"'),
 
     # --- Propriétés de l'exécutable Windows
     (VERSION, '#define VER_FILEDESCRIPTION_STR     "Euro-Office Desktop Editors\\0"',
@@ -61,6 +65,8 @@ RULES = [
     (INNO, '#define sCompanyName                    "Euro-Office"', '#define sCompanyName                    "Kalyptik"'),
     (INNO, '#define sProductName                    "Desktop Editors"', '#define sProductName                    "Office"'),
     (INNO, '#define sAppName                        str(sCompanyName)', f'#define sAppName                        "{SUITE}"'),
+    (INNO, '#define sAppPublisherURL                "https://www.onlyoffice.com/"', f'#define sAppPublisherURL                "{SITE}"'),
+    (INNO, '#define sAppSupportURL                  "https://www.onlyoffice.com/support.aspx"', f'#define sAppSupportURL                  "{SITE}"'),
     (INNO, '#define sAppIconName                    "Euro-Office"', f'#define sAppIconName                    "{SUITE}"'),
     (INNO, '#define APP_USER_MODEL_ID               "ASC.Documents.5"', '#define APP_USER_MODEL_ID               "Kalyptik.Office.1"'),
     (INNO, '#define APP_MUTEX_NAME                  "TEAMLAB"', '#define APP_MUTEX_NAME                  "KALYPTIK_OFFICE"'),

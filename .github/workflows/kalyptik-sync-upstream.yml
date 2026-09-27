@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '17 6 * * 1'   # chaque lundi
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/kalyptik-sync-upstream.yml'   # se vérifie à chaque modification
 
 permissions:
   contents: write

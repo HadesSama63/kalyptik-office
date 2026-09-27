@@ -1,0 +1,14 @@
+diff --git a/apps/common/main/lib/controller/Themes.js b/apps/common/main/lib/controller/Themes.js
+index 1341a074..47d710f2 100644
+--- a/apps/common/main/lib/controller/Themes.js
++++ b/apps/common/main/lib/controller/Themes.js
+@@ -249,6 +249,9 @@ define([
+ 
+                 if ( !!t.src.icons['style-class-selector'] )
+                     t.icons.src = t.src.icons['style-class-selector'];
++
++                if ( !!t.src.icons['cls'] )
++                    t.icons.cls = t.src.icons['cls'];
+             }
+         };
+ 

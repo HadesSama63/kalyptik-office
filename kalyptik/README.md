@@ -16,10 +16,12 @@ facilement les futures versions, on respecte une règle simple :
 | `kalyptik/theme/`      | aspect visuel : logos, icônes, couleurs, thèmes, textes    |
 | `kalyptik/modules/`    | modules ajoutés (plugins des éditeurs)                     |
 | `kalyptik/scripts/`    | outils (synchronisation avec Euro-Office, application du thème) |
+| `kalyptik/patches/`    | correctifs minimes du code d'Euro-Office, appliqués au build |
 
 Les fichiers d'Euro-Office ne sont pas modifiés ; on ajoute des fichiers
 *nouveaux* (`kalyptik/`, `.github/workflows/kalyptik-*.yml`), donc les mises à
-jour ne génèrent pas de conflit. Seule exception : une ligne
+jour ne génèrent pas de conflit. Exceptions : les correctifs de `kalyptik/patches/` (appliqués au build,
+jamais commités dans les sous-modules) et une ligne
 `if: github.repository_owner == 'Euro-Office'` dans `build.yml` et `winget.yml`
 pour que ces workflows d'Euro-Office (qui ont besoin de leurs secrets, ou qui
 publieraient sur winget sous leur nom) ne tournent pas chez nous.

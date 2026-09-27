@@ -1,0 +1,13 @@
+diff --git a/win-linux/src/cthemes.cpp b/win-linux/src/cthemes.cpp
+index 4926380..c798ec9 100644
+--- a/win-linux/src/cthemes.cpp
++++ b/win-linux/src/cthemes.cpp
+@@ -345,7 +345,7 @@ public:
+         GET_REGISTRY_USER(_reg_user);
+ 
+ #if !defined(__OS_WIN_XP)
+-        QString user_theme = _reg_user.value(REGISTRY_THEME_KEY, THEME_ID_SYSTEM).toString();
++        QString user_theme = _reg_user.value(REGISTRY_THEME_KEY, "kalyptik-light.json").toString();
+ #else
+         QString user_theme = _reg_user.value(REGISTRY_THEME_KEY, THEME_DEFAULT_LIGHT_ID).toString();
+ #endif

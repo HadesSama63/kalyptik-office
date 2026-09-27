@@ -1,0 +1,48 @@
+<svg width="264" height="264" viewBox="0 -4 264 264" fill="none" xmlns="http://www.w3.org/2000/svg">
+<title>KalyptWrite</title>
+<g clip-path="url(#sheetClip)">
+<rect x="72" y="24" width="176" height="208" rx="26" fill="#2563EB"/>
+<rect x="72" y="24" width="176" height="70" fill="#93C5FD"/>
+<rect x="72" y="94" width="176" height="70" fill="#60A5FA"/>
+<rect x="72" y="164" width="176" height="70" fill="#2563EB"/>
+<rect x="168" y="42" width="64" height="8" rx="4" fill="white" fill-opacity="0.75"/>
+<rect x="168" y="62" width="40" height="8" rx="4" fill="white" fill-opacity="0.75"/>
+<rect x="168" y="112" width="64" height="8" rx="4" fill="white" fill-opacity="0.75"/>
+<rect x="168" y="132" width="40" height="8" rx="4" fill="white" fill-opacity="0.75"/>
+<rect x="168" y="182" width="64" height="8" rx="4" fill="white" fill-opacity="0.85"/>
+<rect x="168" y="202" width="40" height="8" rx="4" fill="white" fill-opacity="0.85"/>
+</g>
+<rect x="72.5" y="24.5" width="175" height="207" rx="25.5" stroke="white" stroke-opacity="0.18"/>
+<g filter="url(#badgeShadow)">
+<rect x="24" y="60" width="136" height="136" rx="24" fill="url(#badgeFill)"/>
+<rect x="24.75" y="60.75" width="134.5" height="134.5" rx="23.25" stroke="white" stroke-opacity="0.1" stroke-width="1.5"/>
+<path d="M68.4314 153L53.6114 96.38H66.3794L77.5514 143.804H74.1314L85.9114 96.38H98.0714L109.851 143.804H106.431L117.603 96.38H130.371L115.551 153H101.871L90.0154 107.4H93.9674L82.1114 153H68.4314Z" fill="#60A5FA"/>
+<rect x="60" y="168" width="64" height="8" rx="4" fill="url(#inkLine)"/>
+</g>
+<defs>
+<filter id="badgeShadow" x="0" y="48" width="184" height="184" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="2"/>
+<feGaussianBlur stdDeviation="1"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.01 0 0 0 0 0.02 0 0 0 0 0.05 0 0 0 0.45 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="12"/>
+<feGaussianBlur stdDeviation="12"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.01 0 0 0 0 0.02 0 0 0 0 0.05 0 0 0 0.35 0"/>
+<feBlend mode="normal" in2="effect1" result="effect2"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect2" result="shape"/>
+</filter>
+<linearGradient id="badgeFill" x1="92" y1="60" x2="92" y2="196" gradientUnits="userSpaceOnUse">
+<stop stop-color="#1A2338"/><stop offset="1" stop-color="#0F1624"/>
+</linearGradient>
+<linearGradient id="inkLine" x1="60" y1="172" x2="124" y2="172" gradientUnits="userSpaceOnUse">
+<stop stop-color="#32B8C6"/><stop offset="1" stop-color="#7C3AED"/>
+</linearGradient>
+<linearGradient id="inkBand" x1="72" y1="199" x2="248" y2="199" gradientUnits="userSpaceOnUse">
+<stop stop-color="#1D748F"/><stop offset="1" stop-color="#7C3AED"/>
+</linearGradient>
+<clipPath id="sheetClip"><rect x="72" y="24" width="176" height="208" rx="26" fill="white"/></clipPath>
+</defs>
+</svg>

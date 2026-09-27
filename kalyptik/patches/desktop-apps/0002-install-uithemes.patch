@@ -1,0 +1,19 @@
+diff --git a/win-linux/CMakeLists.txt b/win-linux/CMakeLists.txt
+index b256bac..d53b2c5 100644
+--- a/win-linux/CMakeLists.txt
++++ b/win-linux/CMakeLists.txt
+@@ -521,6 +521,14 @@ install(DIRECTORY "${EO_CORE_OUTPUT_DIR}/"
+     DESTINATION ${CMAKE_INSTALL_BINDIR}/converter
+ )
+ 
++# Kalyptik: interface themes → uithemes/ (loaded automatically at startup)
++if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/res/uithemes")
++    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/res/uithemes/"
++        DESTINATION ${CMAKE_INSTALL_BINDIR}/uithemes
++        FILES_MATCHING PATTERN "*.json"
++    )
++endif()
++
+ # Boost: on Windows it's static (linked into the binaries) — nothing to install
+ if(NOT WIN32)
+     install(DIRECTORY "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/boost/linux_64/lib/"

@@ -17,6 +17,7 @@ facilement les futures versions, on respecte une règle simple :
 | `kalyptik/modules/`    | modules ajoutés (plugins des éditeurs)                     |
 | `kalyptik/scripts/`    | outils (synchronisation avec Euro-Office, application du thème) |
 | `kalyptik/patches/`    | correctifs minimes du code d'Euro-Office, appliqués au build |
+| `kalyptik/brand/`      | nom Kalyptik Office, logos, icônes, écran d'accueil, installeurs |
 
 Les fichiers d'Euro-Office ne sont pas modifiés ; on ajoute des fichiers
 *nouveaux* (`kalyptik/`, `.github/workflows/kalyptik-*.yml`), donc les mises à
@@ -42,6 +43,21 @@ Il peut aussi être lancé à la main (onglet *Actions* → *Run workflow*).
 ```sh
 ./kalyptik/scripts/sync-upstream.sh
 git push
+```
+
+## Compiler Kalyptik Office
+
+Onglet **Actions → Kalyptik - Build → Run workflow** (Linux x64 coché par
+défaut, Windows x64 en option). Les paquets (.deb, .rpm, installeur .exe)
+sont téléchargeables en bas de la page de l'exécution, rubrique *Artifacts*.
+La première compilation dure plusieurs heures ; les suivantes utilisent le cache.
+
+En local, avant de lancer le build d'Euro-Office (`build/`) :
+
+```sh
+git submodule update --init --recursive
+./kalyptik/scripts/apply-kalyptik.sh
+COMPANY_NAME=Kalyptik PRODUCT_NAME=Office docker buildx bake ...   # voir build/linux/README.md
 ```
 
 ## Architecture d'Euro-Office (à connaître)

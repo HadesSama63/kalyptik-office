@@ -1,0 +1,231 @@
+name: Kalyptik - Build
+
+# Compile Kalyptik Office : sources Euro-Office + personnalisation kalyptik/
+# (kalyptik/scripts/apply-kalyptik.sh). Lancement manuel : onglet Actions.
+#
+# Durée : la première compilation est longue (plusieurs heures, les
+# dépendances C++ sont compilées). Les suivantes profitent du cache.
+# Les minutes Windows comptent double dans le quota GitHub Actions.
+
+on:
+  workflow_dispatch:
+    inputs:
+      linux:
+        description: "Linux x64 (.deb, .rpm)"
+        type: boolean
+        default: true
+      windows:
+        description: "Windows x64 (installeur .exe, .zip)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  PRODUCT_VERSION: 9.3.1
+  BUILD_NUMBER: kalyptik.${{ github.run_number }}
+  BUILD_ROOT: /package
+  COMPANY_NAME: Kalyptik
+  PRODUCT_NAME: Office
+  REGISTRY: kalyptik          # rien n'est poussé vers un registre
+
+jobs:
+  # Éditeurs web (JS + WASM), communs à Linux et Windows
+  build-common:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Appliquer Kalyptik Office
+        run: ./kalyptik/scripts/apply-kalyptik.sh
+
+      - uses: docker/setup-buildx-action@v3
+        id: buildx
+
+      - uses: actions/cache@v4
+        id: wasm-cache
+        with:
+          path: |
+            wasm-ccache
+            wasm-em-cache
+          key: ${{ runner.os }}-wasm-${{ hashFiles('core/**/CMakeLists.txt') }}
+          restore-keys: ${{ runner.os }}-wasm-
+
+      - uses: reproducible-containers/buildkit-cache-dance@v3.4.0
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          cache-map: |
+            {
+              "wasm-ccache":   { "target": "/ccache",   "id": "wasm-ccache" },
+              "wasm-em-cache": { "target": "/em-cache", "id": "wasm-em-cache" }
+            }
+          skip-extraction: ${{ steps.wasm-cache.outputs.cache-hit }}
+
+      - name: Compiler les éditeurs web
+        uses: docker/bake-action@v5
+        with:
+          workdir: ./build
+          files: ./docker-bake.hcl
+          targets: desktop-common
+          push: false
+          set: |
+            *.cache-from=type=gha,scope=kalyptik-common
+            *.cache-to=type=gha,scope=kalyptik-common,mode=max
+            *.tags=
+            desktop-common.output=type=tar,dest=./common.tar
+        env:
+          NUGET_CACHE: local
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: common-files
+          path: ./build/common.tar
+          compression-level: 0
+          retention-days: 3
+
+  build-linux:
+    if: inputs.linux
+    needs: build-common
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Appliquer Kalyptik Office
+        run: ./kalyptik/scripts/apply-kalyptik.sh
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: common-files
+          path: ./build/linux
+
+      - name: Extraire les éditeurs web
+        run: |
+          mkdir -p ./build/linux/common
+          tar -xf ./build/linux/common.tar -C ./build/linux/common
+
+      - uses: docker/setup-buildx-action@v3
+        id: buildx
+
+      - uses: actions/cache@v4
+        id: desktop-cache
+        with:
+          path: |
+            ccache
+            nuget-cache
+          key: ${{ runner.os }}-desktop-${{ hashFiles('core/vcpkg.json', 'desktop-apps/win-linux/CMakeLists.txt') }}
+          restore-keys: ${{ runner.os }}-desktop-
+
+      - uses: reproducible-containers/buildkit-cache-dance@v3.4.0
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          cache-map: |
+            {
+              "ccache": { "target": "/ccache", "id": "ccache" },
+              "nuget-cache": { "target": "/nuget-cache", "id": "nuget-cache" }
+            }
+          skip-extraction: ${{ steps.desktop-cache.outputs.cache-hit }}
+
+      - name: Compiler l'application et les paquets Linux
+        uses: docker/bake-action@v5
+        with:
+          workdir: ./build/linux
+          files: ./docker-bake.hcl
+          targets: packages
+          push: false
+          set: |
+            *.cache-from=type=gha,scope=kalyptik-linux
+            *.cache-to=type=gha,scope=kalyptik-linux,mode=max
+            *.tags=
+            desktop-linux.contexts.desktop-common=./common
+        env:
+          GIT_COMMIT: ${{ github.sha }}
+          NUGET_CACHE: local
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kalyptik-office-linux-x64
+          path: |
+            build/linux/deploy/packages/*.deb
+            build/linux/deploy/packages/*.rpm
+            build/linux/deploy/packages/*.tar.xz
+
+  build-windows:
+    if: inputs.windows
+    needs: build-common
+    runs-on: windows-2022
+    timeout-minutes: 360
+    env:
+      PYTHONUTF8: "1"
+      SCCACHE_GHA_ENABLED: "true"
+    steps:
+      # garder les fins de ligne d'origine : les correctifs Kalyptik s'appliquent tels quels
+      - run: git config --global core.autocrlf false
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Appliquer Kalyptik Office
+        shell: bash
+        run: ./kalyptik/scripts/apply-kalyptik.sh
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: common-files
+          path: .
+
+      - name: Extraire les éditeurs web
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path .\common | Out-Null
+          tar -xf .\common.tar -C .\common
+
+      - name: Install Cygwin
+        uses: cygwin/cygwin-install-action@v4
+        with:
+          install-dir: 'C:\cygwin64'
+          add-to-path: false
+          packages: >-
+            automake
+            cmake
+            make
+            git
+            python3
+            python3-devel
+
+      - name: Install aqtinstall
+        shell: pwsh
+        run: python -m pip install --upgrade --break-system-packages aqtinstall
+
+      - uses: mozilla-actions/sccache-action@v0.0.10
+
+      - name: Install Ninja
+        shell: pwsh
+        run: choco install ninja -y --no-progress
+
+      - uses: lukka/run-vcpkg@v11
+
+      - name: Compiler et créer l'installeur
+        shell: pwsh
+        run: |
+          .\build\windows\build.ps1 `
+            -CommonDir      "${{ github.workspace }}\common" `
+            -ProductVersion "${{ env.PRODUCT_VERSION }}" `
+            -Arch           x64 `
+            -Target         standalone `
+            -CompanyName    Kalyptik `
+            -ProductName    Office
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kalyptik-office-windows-x64
+          path: |
+            desktop-apps/package/zip/*.zip
+            desktop-apps/package/inno/*.exe

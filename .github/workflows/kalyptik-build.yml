@@ -276,6 +276,18 @@ jobs:
 
       - uses: lukka/run-vcpkg@v11
 
+      # Dépendances C++ compilées (V8, CEF, Qt, ICU, Boost, OpenSSL…) : plus
+      # d'une heure de compilation, gardée en cache. Seul install/ est gardé :
+      # chaque dépendance y dépose un marqueur « ok » et n'est plus recompilée.
+      # Le cache est invalidé si Euro-Office change ses scripts de dépendances.
+      - name: Restaurer les dépendances C++
+        id: tp-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: third_party/install
+          key: win-x64-3rdparty-${{ hashFiles('core/Common/3dParty/**/*.py', 'core/Common/3dParty/**/*.patch') }}-${{ github.run_id }}
+          restore-keys: win-x64-3rdparty-${{ hashFiles('core/Common/3dParty/**/*.py', 'core/Common/3dParty/**/*.patch') }}-
+
       # OpenSSL échoue quand il est compilé depuis build.ps1 (nmake : « don't
       # know how to make apps\apps.c ») mais réussit dans un environnement
       # MSVC simple : on le compile avant, build.ps1 le trouve déjà prêt.
@@ -299,6 +311,15 @@ jobs:
             -Target         standalone `
             -CompanyName    Kalyptik `
             -ProductName    Office
+
+      # Enregistré même si la suite du build échoue : les dépendances déjà
+      # terminées (marqueur « ok ») ne seront pas recompilées la fois suivante.
+      - name: Enregistrer les dépendances C++
+        if: always() && steps.tp-cache.outcome == 'success'
+        uses: actions/cache/save@v4
+        with:
+          path: third_party/install
+          key: ${{ steps.tp-cache.outputs.cache-primary-key }}
 
       - uses: actions/upload-artifact@v4
         with:

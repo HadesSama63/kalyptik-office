@@ -51,6 +51,9 @@ Onglet **Actions → Kalyptik - Build → Run workflow** (Linux x64 coché par
 défaut, Windows x64 en option). Les paquets (.deb, .rpm, installeur .exe)
 sont téléchargeables en bas de la page de l'exécution, rubrique *Artifacts*.
 La première compilation dure plusieurs heures ; les suivantes utilisent le cache.
+Sous Windows, les dépendances C++ (V8, CEF, Qt, ICU…) sont gardées en cache
+(`third_party/install`) et recompilées seulement si Euro-Office modifie leurs
+scripts (`core/Common/3dParty`).
 
 En local, avant de lancer le build d'Euro-Office (`build/`) :
 

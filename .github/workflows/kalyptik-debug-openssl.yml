@@ -1,0 +1,40 @@
+name: Kalyptik - Diagnostic OpenSSL Windows
+
+# Reproduit seul le build OpenSSL 1.1.1w d'Euro-Office sous Windows
+# (core/Common/3dParty/openssl/nc-build.py) pour comprendre ses échecs.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  openssl:
+    runs-on: windows-2022
+    steps:
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Outils
+        shell: pwsh
+        run: |
+          Get-Command perl, nmake, git | Format-Table Name, Source
+          perl -v | Select-Object -First 2
+          git config --global --list
+
+      - name: Clone (comme Euro-Office)
+        shell: pwsh
+        run: |
+          git -c core.autocrlf=false -c core.eol=lf clone --depth 1 --branch OpenSSL_1_1_1w https://github.com/openssl/openssl.git D:\ossl
+          Get-ChildItem D:\ossl\apps\apps.c
+
+      - name: Configure
+        shell: pwsh
+        working-directory: D:\ossl
+        run: |
+          perl Configure VC-WIN64A --prefix=D:\ossl-install --openssldir=D:\ossl-install enable-md2 no-shared no-asm
+          Select-String -Path makefile -Pattern 'apps\\apps' | Select-Object -First 5
+
+      - name: nmake
+        shell: pwsh
+        working-directory: D:\ossl
+        run: nmake

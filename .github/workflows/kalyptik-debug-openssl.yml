@@ -19,7 +19,7 @@ jobs:
         run: |
           Get-Command perl, nmake, git | Format-Table Name, Source
           perl -v | Select-Object -First 2
-          git config --global --list
+          git config --global --list; $global:LASTEXITCODE = 0
 
       - name: Clone (comme Euro-Office)
         shell: pwsh

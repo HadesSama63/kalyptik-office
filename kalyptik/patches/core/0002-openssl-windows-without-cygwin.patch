@@ -1,0 +1,40 @@
+diff --git a/Common/3dParty/openssl/nc-build.py b/Common/3dParty/openssl/nc-build.py
+index d6e187e9..35fd6e5f 100644
+--- a/Common/3dParty/openssl/nc-build.py
++++ b/Common/3dParty/openssl/nc-build.py
+@@ -77,6 +77,9 @@ def build_and_install():
+ 
+     elif nc.is_windows():
+         ossl_target = openssl_windows_target()
++        # Kalyptik: Cygwin in PATH breaks OpenSSL's nmake build; hide it here.
++        win_env = { "PATH": os.pathsep.join(
++            d for d in os.environ.get( "PATH", "" ).split( os.pathsep ) if "cygwin" not in d.lower() ) }
+         nc.run_command(
+             [   shutil.which("perl"),
+                 "Configure",
+@@ -88,19 +91,22 @@ def build_and_install():
+                 "no-asm",
+             ],
+             "Configure",
+-            nc.work_dir
++            nc.work_dir,
++            env = win_env
+         )
+ 
+         nc.run_command(
+             [ "nmake" ],
+             "Build",
+-            nc.work_dir
++            nc.work_dir,
++            env = win_env
+         )
+ 
+         nc.run_command(
+             [ "nmake", "install" ],
+             "Install",
+-            nc.work_dir
++            nc.work_dir,
++            env = win_env
+         )
+ 
+     else:

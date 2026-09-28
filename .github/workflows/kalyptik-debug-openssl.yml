@@ -1,7 +1,8 @@
 name: Kalyptik - Diagnostic OpenSSL Windows
 
 # Reproduit seul le build OpenSSL 1.1.1w d'Euro-Office sous Windows
-# (core/Common/3dParty/openssl/nc-build.py) pour comprendre ses échecs.
+# (core/Common/3dParty/openssl/nc-build.py) pour comprendre ses échecs :
+# même script que le build complet, avec ou sans Cygwin dans le PATH.
 
 on:
   workflow_dispatch:
@@ -9,32 +10,52 @@ on:
 jobs:
   openssl:
     runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        cygwin: [true, false]
+    env:
+      PYTHONUTF8: "1"
     steps:
+      - run: git config --global core.autocrlf false
+
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github
+      - name: Sous-module core seul
+        run: git submodule update --init --depth 1 core
+
+      - name: Install Cygwin
+        if: matrix.cygwin
+        uses: cygwin/cygwin-install-action@v4
+        with:
+          install-dir: 'C:\cygwin64'
+          add-to-path: false
+          packages: automake cmake make git python3
+
       - uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
 
-      - name: Outils
+      - name: build_3rdparty --only=openssl
         shell: pwsh
         run: |
-          Get-Command perl, nmake, git | Format-Table Name, Source
-          perl -v | Select-Object -First 2
-          git config --global --list; $global:LASTEXITCODE = 0
-
-      - name: Clone (comme Euro-Office)
-        shell: pwsh
-        run: |
-          git -c core.autocrlf=false -c core.eol=lf clone --depth 1 --branch OpenSSL_1_1_1w https://github.com/openssl/openssl.git D:\ossl
-          Get-ChildItem D:\ossl\apps\apps.c
-
-      - name: Configure
-        shell: pwsh
-        working-directory: D:\ossl
-        run: |
-          perl Configure VC-WIN64A --prefix=D:\ossl-install --openssldir=D:\ossl-install enable-md2 no-shared no-asm
-          Select-String -Path makefile -Pattern 'apps\\apps' | Select-Object -First 5
-
-      - name: nmake
-        shell: pwsh
-        working-directory: D:\ossl
-        run: nmake
+          if ('${{ matrix.cygwin }}' -eq 'true') {
+            $native = @()
+            foreach ($t in 'perl','python','git','cmake') {
+              $d = Split-Path (Get-Command $t).Source
+              if ($t -eq 'git' -and $d -like '*\Git\bin') { $d = Join-Path (Split-Path $d) 'cmd' }
+              $native += $d
+            }
+            $env:PATH = ($native + 'C:\cygwin64\bin' + $env:PATH) -join ';'
+          }
+          Get-Command perl, python, git, nmake, make -ErrorAction SilentlyContinue | Format-Table Name, Source
+          Get-ChildItem env: | Where-Object Name -match 'MAKE|^CC$|CFLAGS|PERL|SRC|BLD|CYGWIN|SHELL' | Format-Table -AutoSize
+          python core/Common/3dParty/build_3rdparty.py --only=openssl D:\tp\work D:\tp\install
+          $code = $LASTEXITCODE
+          Get-ChildItem D:\tp\work\openssl\apps\apps.c -ErrorAction SilentlyContinue
+          if (Test-Path D:\tp\work\openssl\makefile) {
+            Select-String -Path D:\tp\work\openssl\makefile -Pattern 'apps\\apps\.c' | Select-Object -First 3
+            Select-String -Path D:\tp\work\openssl\makefile -Pattern '^(SRCDIR|BLDDIR|PERL|MAKE)\b' | Select-Object -First 6
+          }
+          exit $code

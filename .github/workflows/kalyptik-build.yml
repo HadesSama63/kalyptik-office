@@ -198,6 +198,13 @@ jobs:
           GIT_COMMIT: ${{ github.sha }}
           NUGET_CACHE: local
 
+      - name: État de la machine (diagnostic)
+        if: always()
+        run: |
+          nproc; free -h; df -h / /mnt
+          docker info --format 'Docker root: {{.DockerRootDir}}'
+          docker system df || true
+
       - uses: actions/upload-artifact@v4
         with:
           name: kalyptik-office-linux-x64

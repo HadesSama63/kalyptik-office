@@ -272,17 +272,15 @@ jobs:
       # OpenSSL échoue quand il est compilé depuis build.ps1 (nmake : « don't
       # know how to make apps\apps.c ») mais réussit dans un environnement
       # MSVC simple : on le compile avant, build.ps1 le trouve déjà prêt.
-      - uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
-
+      # L'environnement MSVC est chargé dans cette seule étape : le garder
+      # pour build.ps1 (qui le charge aussi) rendrait le PATH trop long.
       - name: Précompiler OpenSSL
-        shell: pwsh
+        shell: cmd
         run: |
-          python core/Common/3dParty/build_3rdparty.py --only=openssl `
-            "${{ github.workspace }}\third_party\work" "${{ github.workspace }}\third_party\install"
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          Get-ChildItem third_party\install\openssl
+          for /f "usebackq delims=" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath`) do set VSDIR=%%i
+          call "%VSDIR%\VC\Auxiliary\Build\vcvars64.bat" || exit /b 1
+          python core\Common\3dParty\build_3rdparty.py --only=openssl "%GITHUB_WORKSPACE%\third_party\work" "%GITHUB_WORKSPACE%\third_party\install" || exit /b 1
+          dir third_party\install\openssl
 
       - name: Compiler et créer l'installeur
         shell: pwsh

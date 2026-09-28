@@ -259,7 +259,14 @@ jobs:
 
       - name: Install aqtinstall
         shell: pwsh
-        run: python -m pip install --upgrade --break-system-packages aqtinstall
+        # CMake choisit le Python le plus récent de la machine, pas forcément
+        # celui du PATH : installer aqtinstall dans chacun.
+        run: |
+          foreach ($py in Get-ChildItem C:\hostedtoolcache\windows\Python\*\x64\python.exe) {
+            & $py.FullName -m pip install --upgrade --break-system-packages --quiet aqtinstall
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            Write-Host "aqtinstall -> $($py.FullName)"
+          }
 
       - uses: mozilla-actions/sccache-action@v0.0.10
 

@@ -269,6 +269,21 @@ jobs:
 
       - uses: lukka/run-vcpkg@v11
 
+      # OpenSSL échoue quand il est compilé depuis build.ps1 (nmake : « don't
+      # know how to make apps\apps.c ») mais réussit dans un environnement
+      # MSVC simple : on le compile avant, build.ps1 le trouve déjà prêt.
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Précompiler OpenSSL
+        shell: pwsh
+        run: |
+          python core/Common/3dParty/build_3rdparty.py --only=openssl `
+            "${{ github.workspace }}\third_party\work" "${{ github.workspace }}\third_party\install"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Get-ChildItem third_party\install\openssl
+
       - name: Compiler et créer l'installeur
         shell: pwsh
         run: |

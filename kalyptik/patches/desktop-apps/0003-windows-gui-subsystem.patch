@@ -1,0 +1,16 @@
+diff --git a/win-linux/CMakeLists.txt b/win-linux/CMakeLists.txt
+index b256bac..614b61d 100644
+--- a/win-linux/CMakeLists.txt
++++ b/win-linux/CMakeLists.txt
+@@ -426,6 +426,11 @@ if(WIN32)
+     endforeach()
+     target_link_options(DesktopEditors PRIVATE
+         "/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'")
++    # Kalyptik: windowed applications, not console ones (a CMD window stayed
++    # open behind the editors). main() is kept as the entry point.
++    foreach(_t DesktopEditors editors_helper)
++        target_link_options(${_t} PRIVATE "/SUBSYSTEM:WINDOWS" "/ENTRY:mainCRTStartup")
++    endforeach()
+ endif()
+ 
+ # 10. Translations

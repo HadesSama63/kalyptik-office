@@ -1,8 +1,8 @@
 diff --git a/win-linux/CMakeLists.txt b/win-linux/CMakeLists.txt
-index b256bac..d53b2c5 100644
+index b256bac..a40dc77 100644
 --- a/win-linux/CMakeLists.txt
 +++ b/win-linux/CMakeLists.txt
-@@ -521,6 +521,14 @@ install(DIRECTORY "${EO_CORE_OUTPUT_DIR}/"
+@@ -521,6 +521,24 @@ install(DIRECTORY "${EO_CORE_OUTPUT_DIR}/"
      DESTINATION ${CMAKE_INSTALL_BINDIR}/converter
  )
  
@@ -11,6 +11,16 @@ index b256bac..d53b2c5 100644
 +    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/res/uithemes/"
 +        DESTINATION ${CMAKE_INSTALL_BINDIR}/uithemes
 +        FILES_MATCHING PATTERN "*.json"
++    )
++endif()
++
++# Kalyptik: app.ico, used by the Windows shortcuts, the uninstaller entry and
++# notifications ({app}\app.ico in package/inno/common.iss), was never installed:
++# the shortcuts showed a blank page instead of the application icon.
++if(WIN32)
++    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/icons/desktopeditors-eo.ico"
++        DESTINATION ${CMAKE_INSTALL_BINDIR}
++        RENAME app.ico
 +    )
 +endif()
 +

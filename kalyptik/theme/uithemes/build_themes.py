@@ -10,8 +10,14 @@ puis remplace ses couleurs par celles du design system ProfZen 2
 On repart du thème d'origine à chaque génération : si Euro-Office ajoute
 des variables dans une mise à jour, il suffit de relancer ce script.
 
-    git submodule update --init --depth 1 web-apps
+    git submodule update --init --depth 1 web-apps desktop-apps
     python3 kalyptik/theme/uithemes/build_themes.py
+
+Un thème sert à deux endroits : les éditeurs (web-apps) et l'écran d'accueil
+/ paramètres (desktop-apps/common/loginpage), qui a ses propres variables
+(onglets, panneau latéral, cases à cocher…). Il faut les deux : une variable
+absente retombe sur la valeur claire par défaut (texte blanc sur fond blanc
+dans le thème sombre).
 """
 import json
 import re
@@ -21,6 +27,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 LESS = ROOT / "web-apps/apps/common/main/resources/less"
+LOGIN_LESS = ROOT / "desktop-apps/common/loginpage/src/css"
 
 # Couleur de chaque logiciel (mêmes teintes que les icônes)
 APPS_LIGHT = {"document": "#2563EB", "spreadsheet": "#059669", "presentation": "#D97706",
@@ -175,13 +182,59 @@ DARK = {
     "border-radius-form-control": "6px",
 }
 
+# Écran d'accueil et paramètres (variables propres à loginpage)
+LIGHT_START = {
+    "background-tabbar": "#EEF1F6",
+    "background-normal-element": "#F4F6FA",
+    "background-normal-element-light": "#FAFBFD",
+    "background-action-panel": "#FFFFFF",
+    "background-icon-normal": "#FFFFFF",
+    "background-primary-button": "#1D748F",
+    "highlight-primary-button-hover": "#17657D",
+    "highlight-primary-button-pressed": "#125669",
+    "highlight-accent-button-hover": "#17657D",
+    "highlight-accent-button-pressed": "#125669",
+    "highlight-sidebar-item-pressed": "#FFFFFF",
+    "highlight-toolbar-tab-underline-document": "#1D748F",
+    "border-tabbar": "#D5DCE7",
+    "chb-background-checked": "#1D748F",
+    "chb-border-checked": "#1D748F",
+}
+
+DARK_START = {
+    "background-tabbar": "#070D18",
+    "background-button": "#141C2E",
+    "background-normal-element": "#141C2E",
+    "background-normal-element-light": "#1A2338",
+    "background-action-panel": "#141C2E",
+    "background-icon-normal": "#141C2E",
+    "background-primary-button": "#1D748F",
+    "background-scroll-thumb": "rgba(255, 255, 255, 0.16)",
+    "highlight-primary-button-hover": "#23839F",
+    "highlight-primary-button-pressed": "#17657D",
+    "highlight-accent-button-hover": "#23839F",
+    "highlight-accent-button-pressed": "#17657D",
+    "highlight-scroll-thumb-hover": "rgba(255, 255, 255, 0.28)",
+    "highlight-sidebar-item-pressed": "#1A2338",
+    "border-tabbar": "rgba(255, 255, 255, 0.10)",
+    "border-sidebar-icon": "rgba(255, 255, 255, 0.16)",
+    "text-inverse": "#FFFFFF",
+    "text-contrast-background": "#FFFFFF",
+    "chb-background-checked": "#1D748F",
+    "chb-border-checked": "#1D748F",
+}
+
+# Onglets de la fenêtre (Qt) : « draw » est le nom côté application, « visio » côté éditeurs
+LIGHT["toolbar-header-draw"] = LIGHT["toolbar-header-visio"]
+DARK["toolbar-header-draw"] = DARK["toolbar-header-visio"]
+
 THEMES = [
     {"file": "kalyptik-light.json", "id": "theme-kalyptik-light", "type": "light",
      "name": "Kalyptik Light", "fr": "Kalyptik Clair", "base": ("colors-table-white.less", "theme-white"),
-     "overrides": LIGHT},
+     "start": ("colors_white.less", "theme-white"), "overrides": {**LIGHT, **LIGHT_START}},
     {"file": "kalyptik-dark.json", "id": "theme-kalyptik-dark", "type": "dark",
      "name": "Kalyptik Dark", "fr": "Kalyptik Sombre", "base": ("colors-table-night.less", "theme-night"),
-     "overrides": DARK},
+     "start": ("colors_night.less", "theme-night"), "overrides": {**DARK, **DARK_START}},
 ]
 
 
@@ -194,8 +247,8 @@ def fade_to_rgba(value):
     return re.sub(r"fade\(\s*#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})\s*,\s*([\d.]+)%\s*\)", repl, value)
 
 
-def read_base(less_file, css_class):
-    text = (LESS / less_file).read_text()
+def read_base(less_file, css_class, folder=LESS):
+    text = (folder / less_file).read_text()
     start = text.index("." + css_class)
     body, depth = [], 0
     for line in text[start:].splitlines():
@@ -213,10 +266,13 @@ def read_base(less_file, css_class):
 
 
 def main():
-    if not LESS.exists():
-        sys.exit("web-apps absent : lancez `git submodule update --init --depth 1 web-apps`")
+    if not LESS.exists() or not LOGIN_LESS.exists():
+        sys.exit("sources absentes : lancez `git submodule update --init --depth 1 web-apps desktop-apps`")
     for t in THEMES:
         colors = read_base(*t["base"])
+        # variables de l'écran d'accueil que les éditeurs n'ont pas
+        for k, v in read_base(*t["start"], folder=LOGIN_LESS).items():
+            colors.setdefault(k, v)
         unknown = sorted(set(t["overrides"]) - set(colors))
         if unknown:
             print(f"{t['file']}: variables absentes du thème de base (ajoutées quand même) : {unknown}")

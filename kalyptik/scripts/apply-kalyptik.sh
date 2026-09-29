@@ -10,6 +10,8 @@
 #   2. renommage                 kalyptik/brand/rebrand.py
 #   3. images et icônes          kalyptik/brand/overlay/  (copié par-dessus)
 #   4. thèmes d'interface        kalyptik/theme/uithemes/*.json
+#   5. traductions françaises    kalyptik/i18n/complete_fr.py
+#   6. mises à jour              kalyptik/update/kalyptik-update.js
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 PYTHON=$(command -v python3 || command -v python)
@@ -39,5 +41,12 @@ echo "== 4. Thèmes d'interface"
 mkdir -p desktop-apps/win-linux/res/uithemes
 cp kalyptik/theme/uithemes/*.json desktop-apps/win-linux/res/uithemes/
 echo "   $(ls kalyptik/theme/uithemes/*.json | wc -l) thèmes copiés"
+
+echo "== 5. Traductions françaises manquantes"
+"$PYTHON" kalyptik/i18n/complete_fr.py
+
+echo "== 6. Notification de nouvelle version"
+cp kalyptik/update/kalyptik-update.js desktop-apps/common/loginpage/src/
+echo "   kalyptik-update.js copié"
 
 echo "Kalyptik Office appliqué."

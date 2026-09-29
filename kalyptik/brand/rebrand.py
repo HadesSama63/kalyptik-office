@@ -27,8 +27,10 @@ SITE = "https://kalyptik.com"
 DEFINES = "desktop-apps/win-linux/src/defines.h"
 VERSION = "desktop-apps/win-linux/src/version.h"
 INNO = "desktop-apps/package/inno/defines.iss"
+INNO_COMMON = "desktop-apps/package/inno/common.iss"
 LINUX_M4 = "desktop-apps/package/common/linux/defines.m4"
 START = "desktop-apps/common/loginpage/src/panelrecent.js"
+START_FR = "desktop-apps/common/loginpage/locale/fr.js"
 
 # (fichier, texte d'origine, remplacement)
 RULES = [
@@ -49,6 +51,29 @@ RULES = [
     (DEFINES, '#define FILE_PREFIX "eurooffice_"', '#define FILE_PREFIX "kalyptik_"'),
     (DEFINES, '#define URL_SITE                "https://github.com/Euro-Office"',
               f'#define URL_SITE                "{SITE}"'),
+
+    # --- Français par défaut (application et installeur ; la langue reste modifiable)
+    (DEFINES, '#define APP_DEFAULT_LOCALE "en-US"', '#define APP_DEFAULT_LOCALE "fr-FR"'),
+    (INNO_COMMON, "[Languages]\n#ifdef _EuroOffice",
+                  "[Languages]\nName: fr; MessagesFile: compiler:Languages\\French.isl;\n#ifdef _EuroOffice"),
+    (INNO_COMMON, "Name: de; MessagesFile: compiler:Languages\\German.isl;\nName: fr; MessagesFile: compiler:Languages\\French.isl;\n",
+                  "Name: de; MessagesFile: compiler:Languages\\German.isl;\n"),
+    (INNO_COMMON, "Compression=lzma2/ultra64\nLZMAUseSeparateProcess=yes",
+                  "Compression=lzma2/ultra64\nLanguageDetectionMethod=none\nLZMAUseSeparateProcess=yes"),
+
+    (START_FR, "newPptx: 'Presentation',", "newPptx: 'Présentation',"),
+    (START_FR, "actClouds: 'Clouds',", "actClouds: 'Stockage en ligne',"),
+    (START_FR, "welWelcome: 'Bienvenue sur __COMPANY_NAME__ Desktop Editors !',", f"welWelcome: 'Bienvenue dans {SUITE} !',"),
+    (START_FR, "ownCloud, Nextcloud and more.',", "ownCloud, Nextcloud et bien d\\'autres.',"),
+
+    # --- Notification de nouvelle version (kalyptik/update/kalyptik-update.js)
+    ("desktop-apps/common/loginpage/build/startpage.json",
+     ',"../src/dialogabout.js"\n                    ,"../src/dialogproviders.js"',
+     ',"../src/dialogabout.js"\n                    ,"../src/kalyptik-update.js"\n                    ,"../src/dialogproviders.js"'),
+
+    # --- Numéro de version complet dans l'installeur (9.3.1.<numéro de build>)
+    ("build/windows/build.ps1", '$VersionFull = "$ProductVersion.0"',
+     '$VersionFull = "$ProductVersion.$(if ($BuildNumber -match \'^\\d+$\') { $BuildNumber } else { 0 })"'),
 
     # --- Propriétés de l'exécutable Windows
     (VERSION, '#define VER_FILEDESCRIPTION_STR     "Euro-Office Desktop Editors\\0"',

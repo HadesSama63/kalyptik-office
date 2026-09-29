@@ -55,6 +55,13 @@ Sous Windows, les dépendances C++ (V8, CEF, Qt, ICU…) sont gardées en cache
 (`third_party/install`) et recompilées seulement si Euro-Office modifie leurs
 scripts (`core/Common/3dParty`).
 
+Pour distribuer une mise à jour aux utilisateurs, cocher aussi **« Publier la
+version »** : voir [update/README.md](update/README.md).
+
+Les textes restés en anglais dans une nouvelle version d'Euro-Office sont
+listés au build (étape « Traductions françaises manquantes ») : ajoutez leur
+traduction dans `kalyptik/i18n/fr.json`.
+
 En local, avant de lancer le build d'Euro-Office (`build/`) :
 
 ```sh

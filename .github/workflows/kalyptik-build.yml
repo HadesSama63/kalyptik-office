@@ -18,6 +18,10 @@ on:
         description: "Windows x64 (installeur .exe, .zip)"
         type: boolean
         default: false
+      publier:
+        description: "Publier la version : les utilisateurs sont prévenus dans l'application"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -221,6 +225,9 @@ jobs:
     env:
       PYTHONUTF8: "1"
       SCCACHE_GHA_ENABLED: "true"
+      # numérique : sert de 4e chiffre à la version (9.3.1.<n>), comparée par la
+      # notification de mise à jour (kalyptik/update)
+      BUILD_NUMBER: ${{ github.run_number }}
     steps:
       # garder les fins de ligne d'origine : les correctifs Kalyptik s'appliquent tels quels
       - run: git config --global core.autocrlf false
@@ -307,6 +314,7 @@ jobs:
           .\build\windows\build.ps1 `
             -CommonDir      "${{ github.workspace }}\common" `
             -ProductVersion "${{ env.PRODUCT_VERSION }}" `
+            -BuildNumber    "${{ github.run_number }}" `
             -Arch           x64 `
             -Target         standalone `
             -CompanyName    Kalyptik `
@@ -327,3 +335,36 @@ jobs:
           path: |
             desktop-apps/package/zip/*.zip
             desktop-apps/package/inno/*.exe
+
+  # Publie une version sur GitHub (onglet Releases). L'application installée
+  # la détecte au démarrage et propose de la télécharger (kalyptik/update).
+  publish:
+    if: inputs.publier && !failure() && !cancelled()
+    needs: [build-linux, build-windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: kalyptik-office-*
+          path: dist
+
+      - name: Créer la version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: v${{ env.PRODUCT_VERSION }}.${{ github.run_number }}
+        run: |
+          mapfile -t files < <(find dist -type f \( -name '*.exe' -o -name '*.deb' -o -name '*.rpm' \))
+          printf '%s\n' "${files[@]}"
+          [ ${#files[@]} -gt 0 ] || { echo "Aucun paquet à publier (cochez Linux et/ou Windows)"; exit 1; }
+          cat > notes.md <<EOF
+          Kalyptik Office ${TAG#v}, basé sur Euro-Office ${PRODUCT_VERSION}.
+
+          - **Windows** : téléchargez le fichier \`.exe\` et lancez-le ; il met à jour l'installation existante.
+          - **Linux** : paquet \`.deb\` (Debian, Ubuntu) ou \`.rpm\` (Fedora, openSUSE).
+
+          Les utilisateurs de Kalyptik Office sont prévenus automatiquement au prochain démarrage.
+          EOF
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "Kalyptik Office ${TAG#v}" --notes-file notes.md "${files[@]}"

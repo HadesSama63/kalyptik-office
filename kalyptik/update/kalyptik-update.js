@@ -32,7 +32,8 @@
         const pkg = (app.pkg || '').toLowerCase();
         const ext = pkg == 'deb' ? '.deb' : pkg == 'rpm' ? '.rpm' :
                     (pkg == 'exe' || /win/i.test(navigator.platform)) ? '.exe' : null;
-        return ext && (assets || []).find(a => a.name.toLowerCase().endsWith(ext));
+        const candidates = (assets || []).filter(a => a.name.toLowerCase().endsWith(ext || '\0') && !/redist/i.test(a.name));
+        return candidates.find(a => /kalyptik/i.test(a.name)) || candidates[0];
     }
 
     function escape(s) {

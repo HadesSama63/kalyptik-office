@@ -1,0 +1,60 @@
+diff --git a/apps/spreadsheeteditor/main/app/controller/DocumentHolderExt.js b/apps/spreadsheeteditor/main/app/controller/DocumentHolderExt.js
+index e2eab11753..451fa44fc0 100644
+--- a/apps/spreadsheeteditor/main/app/controller/DocumentHolderExt.js
++++ b/apps/spreadsheeteditor/main/app/controller/DocumentHolderExt.js
+@@ -3712,6 +3712,11 @@ define([], function () {
+                 case 'trendLineMovingAverage':
+                     chartProps.setDisplayTrendlines(true, 3, 0, 0);
+                     break;
++                case 'trendLineEquationAndRSquared':
++                    if (!chartProps.setDisplayTrendlineEquationAndRSquared(true)) {
++                        Common.UI.warning({msg: _СhartSettingsDlg_view.textEquationAndRSquaredMovingAverageWarning});
++                    }
++                    break;
+                 case 'bShowUpDownBars':
+                     chartProps.setDisplayUpDownBars(true);
+                     break;
+diff --git a/apps/spreadsheeteditor/main/app/view/ChartSettingsDlg.js b/apps/spreadsheeteditor/main/app/view/ChartSettingsDlg.js
+index c179bc04a1..b93e22c139 100644
+--- a/apps/spreadsheeteditor/main/app/view/ChartSettingsDlg.js
++++ b/apps/spreadsheeteditor/main/app/view/ChartSettingsDlg.js
+@@ -1993,7 +1993,9 @@ define([
+         textBase: 'Base',
+         textLogScale: 'Logarithmic Scale',
+         textTrendlineOptions: 'Trendline options',
+-        textShowEquation: 'Display equation on chart'
++        textShowEquation: 'Display equation on chart',
++        textShowEquationAndRSquared: 'Display equation and R² on chart',
++        textEquationAndRSquaredMovingAverageWarning: 'Equation and R² are not available for moving average trendlines. Choose a linear or exponential trendline.'
+ 
+     }, SSE.Views.ChartSettingsDlg || {}));
+ });
+diff --git a/apps/spreadsheeteditor/main/app/view/DocumentHolderExt.js b/apps/spreadsheeteditor/main/app/view/DocumentHolderExt.js
+index 938c4569b2..5b8f660414 100644
+--- a/apps/spreadsheeteditor/main/app/view/DocumentHolderExt.js
++++ b/apps/spreadsheeteditor/main/app/view/DocumentHolderExt.js
+@@ -1478,6 +1478,11 @@ define([], function () {
+                                         caption: me.textMovingAverage, 
+                                         stopPropagation: true, 
+                                         value: 'trendLineMovingAverage'
++                                    },
++                                    {
++                                        caption: _СhartSettingsDlg_view.textShowEquationAndRSquared,
++                                        stopPropagation: true,
++                                        value: 'trendLineEquationAndRSquared'
+                                     }
+                                 ]
+                             })
+diff --git a/apps/spreadsheeteditor/main/locale/en.json b/apps/spreadsheeteditor/main/locale/en.json
+index 3ed5670474..1a38a8cd84 100644
+--- a/apps/spreadsheeteditor/main/locale/en.json
++++ b/apps/spreadsheeteditor/main/locale/en.json
+@@ -2779,6 +2779,8 @@
+   "SSE.Views.ChartSettingsDlg.textShowData": "Show data in hidden rows and columns",
+   "SSE.Views.ChartSettingsDlg.textShowEmptyCells": "Show empty cells as",
+   "SSE.Views.ChartSettingsDlg.textShowEquation": "Display equation on chart",
++  "SSE.Views.ChartSettingsDlg.textShowEquationAndRSquared": "Display equation and R² on chart",
++  "SSE.Views.ChartSettingsDlg.textEquationAndRSquaredMovingAverageWarning": "Equation and R² are not available for moving average trendlines. Choose a linear or exponential trendline.",
+   "SSE.Views.ChartSettingsDlg.textShowGrid": "Grid lines",
+   "SSE.Views.ChartSettingsDlg.textShowSparkAxis": "Show axis",
+   "SSE.Views.ChartSettingsDlg.textShowValues": "Display chart values",

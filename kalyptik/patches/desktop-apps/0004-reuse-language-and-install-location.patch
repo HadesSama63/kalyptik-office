@@ -1,0 +1,9 @@
+diff --git a/package/inno/common.iss b/package/inno/common.iss
+--- a/package/inno/common.iss
++++ b/package/inno/common.iss
+@@ -59,3 +59,5 @@
+ DisableProgramGroupPage   = yes
++UsePreviousAppDir         = yes
++UsePreviousLanguage       = yes
+ DisableWelcomePage        = no
+ DEPCompatible             = no

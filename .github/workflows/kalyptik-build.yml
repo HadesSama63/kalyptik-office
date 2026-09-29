@@ -368,7 +368,7 @@ jobs:
           cat > notes.md <<EOF
           Kalyptik Office ${TAG#v}, basé sur Euro-Office ${PRODUCT_VERSION}.
 
-          - **Windows** : téléchargez le fichier \`.exe\` et lancez-le ; il met à jour l'installation existante.
+          - **Windows** : la mise à jour peut être téléchargée, vérifiée et installée depuis l'application après confirmation ; les documents ouverts suivent le parcours normal de sauvegarde/fermeture.
           - **Linux** : paquet \`.deb\` (Debian, Ubuntu) ou \`.rpm\` (Fedora, openSUSE).
 
           Les utilisateurs de Kalyptik Office sont prévenus automatiquement au prochain démarrage.

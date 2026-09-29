@@ -2,7 +2,23 @@
 
 ## 9.3.1
 
+### New features
+
+#### Spreadsheet Editor
+
+* Added a chart-menu shortcut to display a trendline equation and coefficient
+  of determination for scatter plots
+* Added box-and-whisker charts as scalable vector graphics, with manually entered
+  five-number summaries and a shared scale for comparing up to three boxes
+
 ### Fixes
+
+#### All Editors
+
+* Windows installer reuses the previously selected language and installation folder
+  when upgrading
+* Windows updates can be downloaded, verified, installed, and restarted from the
+  start page after confirmation
 
 #### Spreadsheet Editor
 

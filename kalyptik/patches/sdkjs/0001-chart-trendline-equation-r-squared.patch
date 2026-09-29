@@ -1,0 +1,146 @@
+diff --git a/common/Drawings/Format/ChartSpace.js b/common/Drawings/Format/ChartSpace.js
+index 7bda1f9219..eb2a63a8b9 100644
+--- a/common/Drawings/Format/ChartSpace.js
++++ b/common/Drawings/Format/ChartSpace.js
+@@ -10578,49 +10578,71 @@ function(window, undefined) {
+ 			aSeries[nSer].recalculateTrendlines();
+ 		}
+ 	};
++	function createTrendline(parent, trendlineType, nForecastForward, nForecastBackward) {
++		const trendline = new AscFormat.CTrendLine();
++		trendline.setParent(parent);
++
++		trendline.setDispEq(false);
++		trendline.setDispRSqr(false);
++		const safeTrendlineType = AscFormat.isRealNumber(trendlineType) ? trendlineType : AscFormat.TRENDLINE_TYPE_LINEAR;
++		trendline.setTrendlineType(safeTrendlineType);
++
++		if (safeTrendlineType === AscFormat.TRENDLINE_TYPE_MOVING_AVG) {
++			trendline.setPeriod(2);
++		} else {
++			if (AscFormat.isRealNumber(nForecastForward))
++				trendline.setForward(nForecastForward);
++			if (AscFormat.isRealNumber(nForecastBackward))
++				trendline.setBackward(nForecastBackward);
++		}
++
++		const chartSpace = trendline.getChartSpace();
++		if (chartSpace.chartStyle && chartSpace.chartColors) {
++			trendline.applyChartStyle(
++				chartSpace.chartStyle,
++				chartSpace.chartColors,
++				AscFormat.g_oChartStyleCache.getAdditionalData(chartSpace.getChartType(), chartSpace.chartStyle.id),
++				true
++			);
++		} else {
++			trendline.resetFormatting();
++		}
++
++		return trendline;
++	}
+ 	CChartSpace.prototype.showTrendlines = function (bShow, nTrendlineType, nForecastForward, nForecastBackward, useSeriesSelection) {
+ 		const selectedSeries = useSeriesSelection && this.getSelectedSeries();
+ 		const seriesToProcess = selectedSeries ? [selectedSeries] : this.getAllSeries();
+ 		seriesToProcess.forEach(function (ser) {
+ 			ser.removeAllTrendlines();
+ 			if (bShow) {
+-				const newTrendline = createTrendline(ser, nTrendlineType, nForecastForward, nForecastBackward);
+-				ser.addTrendline(newTrendline);
++				ser.addTrendline(createTrendline(ser, nTrendlineType, nForecastForward, nForecastBackward));
+ 			}
+ 		});
+-		
+-		function createTrendline(parent, trendlineType, nForecastForward, nForecastBackward) {
+-			const trendline = new AscFormat.CTrendLine();
+-			trendline.setParent(parent);
+-
+-			trendline.setDispEq(false);
+-			trendline.setDispRSqr(false);
+-			const safeTrendlineType = AscFormat.isRealNumber(trendlineType) ? trendlineType : AscFormat.TRENDLINE_TYPE_LINEAR;
+-			trendline.setTrendlineType(safeTrendlineType);
+-
+-			if (safeTrendlineType === AscFormat.TRENDLINE_TYPE_MOVING_AVG) {
+-				trendline.setPeriod(2);
+-			} else {
+-				if (AscFormat.isRealNumber(nForecastForward))
+-					trendline.setForward(nForecastForward);
+-				if (AscFormat.isRealNumber(nForecastBackward))
+-					trendline.setBackward(nForecastBackward);
++	};
++	CChartSpace.prototype.setDisplayTrendlineEquationAndRSquared = function (bShow) {
++		const selectedSeries = this.getSelectedSeries();
++		const seriesToProcess = selectedSeries ? [selectedSeries] : this.getAllSeries();
++		if (bShow && seriesToProcess.some(function (series) {
++			const trendline = series.getLastTrendline();
++			return trendline && trendline.trendlineType === AscFormat.TRENDLINE_TYPE_MOVING_AVG;
++		})) {
++			return false;
++		}
++		seriesToProcess.forEach(function (series) {
++			let trendline = series.getLastTrendline();
++			if (!trendline && bShow) {
++				trendline = createTrendline(series, AscFormat.TRENDLINE_TYPE_LINEAR, 0, 0);
++				series.addTrendline(trendline);
+ 			}
+-
+-			const chartSpace = trendline.getChartSpace();
+-			if (chartSpace.chartStyle && chartSpace.chartColors) {
+-				trendline.applyChartStyle(
+-					chartSpace.chartStyle,
+-					chartSpace.chartColors,
+-					AscFormat.g_oChartStyleCache.getAdditionalData(chartSpace.getChartType(), chartSpace.chartStyle.id),
+-					true
+-				);
+-			} else {
+-				trendline.resetFormatting();
++			if (trendline) {
++				trendline.setShowLabel(bShow);
++				trendline.setDispEq(bShow ? null : false);
++				trendline.setDispRSqr(bShow);
+ 			}
+-
+-			return trendline;
+-		}
++		});
++		this.recalculateTrendlines();
++		return true;
+ 	};
+ 	CChartSpace.prototype.GetRevisionsChangeElement = function (SearchEngine) {
+ 		var titles = this.getAllTitles(), i;
+diff --git a/common/apiCommon.js b/common/apiCommon.js
+index bffd3c1fb9..be14c24c43 100644
+--- a/common/apiCommon.js
++++ b/common/apiCommon.js
+@@ -1917,6 +1917,24 @@ function (window, undefined) {
+ 			oLogicDocument.Recalculate();
+ 		}
+ 	};
++	asc_ChartSettings.prototype.setDisplayTrendlineEquationAndRSquared = function (bShow) {
++		if (!this.chartSpace) {
++			return false;
++		}
++
++		AscCommon.History.Create_NewPoint(AscDFH.historyitem_type_ChartSpace);
++		const applied = this.chartSpace.setDisplayTrendlineEquationAndRSquared(bShow);
++		if (!applied) {
++			AscCommon.History.Remove_LastPoint();
++			return false;
++		}
++		this.updateChart();
++		const oLogicDocument = Asc.editor.getLogicDocument();
++		if (oLogicDocument) {
++			oLogicDocument.Recalculate();
++		}
++		return true;
++	};
+ 	asc_ChartSettings.prototype.setDisplayUpDownBars = function (bShow) {
+ 		if (!this.chartSpace) {
+ 			return;
+@@ -8493,6 +8511,7 @@ function (window, undefined) {
+ 	prot["setDisplayGridlines"] = prot.setDisplayGridlines;
+ 	prot["setDisplayLegend"] = prot.setDisplayLegend;
+ 	prot["setDisplayTrendlines"] = prot.setDisplayTrendlines;
++	prot["setDisplayTrendlineEquationAndRSquared"] = prot.setDisplayTrendlineEquationAndRSquared;
+ 	prot["setDisplayUpDownBars"] = prot.setDisplayUpDownBars;
+ 
+ 	prot["getExternalReference"] = prot.getExternalReference;

@@ -1,0 +1,303 @@
+diff --git a/win-linux/CMakeLists.txt b/win-linux/CMakeLists.txt
+index b256bacdf..d34f76e2a 100644
+--- a/win-linux/CMakeLists.txt
++++ b/win-linux/CMakeLists.txt
+@@ -26,6 +26,9 @@ if(UNIX)
+     find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS DBus)
+     add_definitions(-DLINUX -D_LINUX -D_WAYLAND)
+ endif()
++if(WIN32)
++    find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Network)
++endif()
+ 
+ if(NOT TARGET hunspell-wrapper)
+     add_subdirectory(${CORE_ROOT_DIR}/Common/3dParty/hunspell/qt hunspell-wrapper)
+@@ -348,7 +351,8 @@ if(WIN32)
+     target_link_libraries(DesktopEditors PRIVATE
+         Qt6::CorePrivate
+         Qt6::GuiPrivate
+-        Qt6::PrintSupportPrivate)
++        Qt6::PrintSupportPrivate
++        Qt${QT_VERSION_MAJOR}::Network)
+ endif()
+ 
+ target_link_directories(DesktopEditors PRIVATE
+diff --git a/win-linux/src/cascapplicationmanagerwrapper.cpp b/win-linux/src/cascapplicationmanagerwrapper.cpp
+index ae52d2cf9..f61c7d4a3 100644
+--- a/win-linux/src/cascapplicationmanagerwrapper.cpp
++++ b/win-linux/src/cascapplicationmanagerwrapper.cpp
+@@ -12,6 +12,16 @@
+ #include <QJsonArray>
+ #include <QProcess>
+ #include <QScreen>
++#include <QCoreApplication>
++#include <QCryptographicHash>
++#include <QFile>
++#include <QFileInfo>
++#include <QNetworkReply>
++#include <QNetworkRequest>
++#include <QRegularExpression>
++#include <QSaveFile>
++#include <QUuid>
++#include <cmath>
+ #include <algorithm>
+ #include <functional>
+ 
+@@ -135,6 +145,203 @@ void CAscApplicationManagerWrapper::StartSaveDialog(const std::wstring& sName, u
+     OnEvent(event);
+ }
+ 
++#ifdef _WIN32
++namespace {
++void sendKalyptikUpdateState(const QString& state, const QString& message = QString(), int progress = -1)
++{
++    QJsonObject data{{"state", state}, {"message", message}};
++    if (progress >= 0)
++        data.insert("progress", progress);
++    CAscApplicationManagerWrapper::sendCommandTo(
++        static_cast<QCefView *>(nullptr),
++        QStringLiteral("app:update"),
++        QString::fromUtf8(QJsonDocument(data).toJson(QJsonDocument::Compact)));
++}
++
++QString quotePowerShell(const QString& value)
++{
++    QString escaped = value;
++    escaped.replace(QLatin1Char('\''), QStringLiteral("''"));
++    return QStringLiteral("'") + escaped + QLatin1Char('\'');
++}
++}
++
++void CAscApplicationManagerWrapper::beginKalyptikUpdate(const QString& params)
++{
++    const auto fail = [](const QString& message) {
++        sendKalyptikUpdateState(QStringLiteral("error"), message);
++    };
++    if (m_kalyptikUpdateInProgress) {
++        fail(QStringLiteral("Un téléchargement de mise à jour est déjà en cours."));
++        return;
++    }
++
++    QJsonParseError parseError;
++    const QJsonDocument document = QJsonDocument::fromJson(params.toUtf8(), &parseError);
++    const QJsonObject data = document.object();
++    const QUrl url(data.value(QStringLiteral("url")).toString());
++    const QString digest = data.value(QStringLiteral("digest")).toString();
++    const QJsonValue sizeValue = data.value(QStringLiteral("size"));
++    const double sizeNumber = sizeValue.toDouble(-1);
++    const bool validSize = sizeValue.isDouble() && std::isfinite(sizeNumber) &&
++        sizeNumber > 0 && sizeNumber <= 1500000000.0 &&
++        sizeNumber == static_cast<double>(static_cast<qint64>(sizeNumber));
++    const qint64 expectedSize = validSize ? static_cast<qint64>(sizeNumber) : 0;
++    const QString path = url.path();
++    const QString fileName = QFileInfo(path).fileName();
++    static const QRegularExpression digestPattern(QStringLiteral("^sha256:([0-9a-fA-F]{64})$"));
++    static const QRegularExpression assetPattern(
++        QStringLiteral("^Kalyptik-(?:Office-[A-Za-z0-9.+_-]+|DesktopEditors-Standalone-[A-Za-z0-9.+_-]+)-x64\\.exe$"));
++    if (parseError.error != QJsonParseError::NoError || !document.isObject() ||
++        url.scheme() != QStringLiteral("https") || url.host() != QStringLiteral("github.com") ||
++        !url.userInfo().isEmpty() || url.port(-1) != -1 ||
++        url.hasQuery() || url.hasFragment() ||
++        !path.startsWith(QStringLiteral("/HadesSama63/kalyptik-office/releases/download/")) ||
++        !assetPattern.match(fileName).hasMatch() || !digestPattern.match(digest).hasMatch() ||
++        !validSize) {
++        fail(QStringLiteral("La source de mise à jour n’a pas pu être validée."));
++        return;
++    }
++
++    const QString destination = QDir::temp().filePath(
++        QStringLiteral("KalyptikOfficeUpdate-%1.exe").arg(QUuid::createUuid().toString(QUuid::WithoutBraces)));
++    const auto output = std::make_shared<QSaveFile>(destination);
++    if (!output->open(QIODevice::WriteOnly)) {
++        fail(QStringLiteral("Impossible de préparer le fichier de mise à jour."));
++        return;
++    }
++
++    if (!m_kalyptikUpdateNetwork)
++        m_kalyptikUpdateNetwork = new QNetworkAccessManager(this);
++    QNetworkRequest request(url);
++    request.setRawHeader("User-Agent", "Kalyptik-Office-Updater");
++    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
++    QNetworkReply *reply = m_kalyptikUpdateNetwork->get(request);
++    m_kalyptikUpdateInProgress = true;
++    const auto writeFailed = std::make_shared<bool>(false);
++    const auto downloadedSize = std::make_shared<qint64>(0);
++    const auto lastProgress = std::make_shared<int>(-1);
++    const auto downloadHash = std::make_shared<QCryptographicHash>(QCryptographicHash::Sha256);
++
++    connect(reply, &QIODevice::readyRead, this,
++            [reply, output, writeFailed, downloadedSize, expectedSize, downloadHash]() {
++        const QByteArray chunk = reply->readAll();
++        if (chunk.size() > expectedSize - *downloadedSize ||
++            output->write(chunk) != chunk.size()) {
++            *writeFailed = true;
++            reply->abort();
++        } else {
++            *downloadedSize += chunk.size();
++            downloadHash->addData(chunk);
++        }
++    });
++    connect(reply, &QNetworkReply::downloadProgress, this,
++            [lastProgress](qint64 received, qint64 total) {
++        if (total <= 0)
++            return;
++        const int progress = static_cast<int>(received * 100 / total);
++        if (progress != *lastProgress) {
++            *lastProgress = progress;
++            sendKalyptikUpdateState(QStringLiteral("downloading"), QString(), progress);
++        }
++    });
++    connect(reply, &QNetworkReply::finished, this,
++            [this, reply, output, destination, digest, expectedSize, downloadedSize,
++             writeFailed, downloadHash]() {
++        const QString finalHost = reply->url().host().toLower();
++        if (reply->error() != QNetworkReply::NoError || *writeFailed ||
++            reply->url().scheme() != QStringLiteral("https") ||
++            (finalHost != QStringLiteral("github.com") &&
++             finalHost != QStringLiteral("release-assets.githubusercontent.com") &&
++             finalHost != QStringLiteral("objects.githubusercontent.com"))) {
++            m_kalyptikUpdateInProgress = false;
++            output->cancelWriting();
++            QFile::remove(destination);
++            sendKalyptikUpdateState(QStringLiteral("error"),
++                QStringLiteral("Le téléchargement de la mise à jour a échoué."));
++            reply->deleteLater();
++            return;
++        }
++        if (!output->commit()) {
++            m_kalyptikUpdateInProgress = false;
++            QFile::remove(destination);
++            sendKalyptikUpdateState(QStringLiteral("error"),
++                QStringLiteral("Impossible d’enregistrer le fichier téléchargé."));
++            reply->deleteLater();
++            return;
++        }
++
++        const QString expectedDigest = digest.mid(QStringLiteral("sha256:").size()).toLower();
++        if (*downloadedSize != expectedSize || QFileInfo(destination).size() != expectedSize ||
++            downloadHash->result().toHex() != expectedDigest) {
++            m_kalyptikUpdateInProgress = false;
++            QFile::remove(destination);
++            sendKalyptikUpdateState(QStringLiteral("error"),
++                QStringLiteral("La vérification de l’intégrité de la mise à jour a échoué."));
++            reply->deleteLater();
++            return;
++        }
++
++        m_kalyptikUpdateInProgress = false;
++        m_kalyptikUpdateInstallerPath = destination;
++        sendKalyptikUpdateState(QStringLiteral("ready"));
++        reply->deleteLater();
++    });
++    sendKalyptikUpdateState(QStringLiteral("downloading"), QString(), 0);
++}
++
++void CAscApplicationManagerWrapper::installKalyptikUpdate()
++{
++    if (m_kalyptikUpdateInProgress || m_kalyptikUpdateInstallerPath.isEmpty() ||
++        !QFileInfo::exists(m_kalyptikUpdateInstallerPath)) {
++        sendKalyptikUpdateState(QStringLiteral("error"),
++            QStringLiteral("Aucun fichier de mise à jour vérifié n’est prêt à être installé."));
++        return;
++    }
++
++    const QString scriptPath = QDir::temp().filePath(
++        QStringLiteral("KalyptikOfficeUpdate-%1.ps1").arg(QUuid::createUuid().toString(QUuid::WithoutBraces)));
++    const QString appPath = QCoreApplication::applicationFilePath();
++    const QString script = QStringLiteral(
++        "$ErrorActionPreference = 'SilentlyContinue'\n"
++        "$installer = %1\n"
++        "$application = %2\n"
++        "$processId = %3\n"
++        "$deadline = (Get-Date).AddMinutes(10)\n"
++        "while ((Get-Process -Id $processId -ErrorAction SilentlyContinue) -and (Get-Date) -lt $deadline) { Start-Sleep -Milliseconds 500 }\n"
++        "if (Get-Process -Id $processId -ErrorAction SilentlyContinue) { Remove-Item -LiteralPath $PSCommandPath -Force; exit 1 }\n"
++        "try { $setup = Start-Process -FilePath $installer -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/CLOSEAPPLICATIONS' -Wait -PassThru } catch { $setup = $null }\n"
++        "if (($null -eq $setup) -or ($setup.ExitCode -ne 0)) { Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show('La mise à jour a échoué. Kalyptik Office va redémarrer avec la version actuelle.') | Out-Null }\n"
++        "if (Test-Path -LiteralPath $application) { Start-Process -FilePath $application }\n"
++        "Remove-Item -LiteralPath $installer -Force\n"
++        "Remove-Item -LiteralPath $PSCommandPath -Force\n")
++        .arg(quotePowerShell(m_kalyptikUpdateInstallerPath),
++             quotePowerShell(appPath),
++             QString::number(QCoreApplication::applicationPid()));
++    QSaveFile scriptFile(scriptPath);
++    const QByteArray scriptBytes = QByteArray::fromHex("efbbbf") + script.toUtf8();
++    if (!scriptFile.open(QIODevice::WriteOnly) ||
++        scriptFile.write(scriptBytes) != scriptBytes.size() ||
++        !scriptFile.commit()) {
++        sendKalyptikUpdateState(QStringLiteral("error"),
++            QStringLiteral("Impossible de préparer le redémarrage après l’installation."));
++        return;
++    }
++
++    const QString powershell = QDir::cleanPath(
++        qEnvironmentVariable("SystemRoot") + QStringLiteral("/System32/WindowsPowerShell/v1.0/powershell.exe"));
++    if (!QFileInfo::exists(powershell) || !QProcess::startDetached(powershell,
++            {QStringLiteral("-NoProfile"), QStringLiteral("-ExecutionPolicy"), QStringLiteral("Bypass"),
++             QStringLiteral("-File"), scriptPath}, QDir::tempPath())) {
++        QFile::remove(scriptPath);
++        sendKalyptikUpdateState(QStringLiteral("error"),
++            QStringLiteral("Impossible de démarrer l’installation de la mise à jour."));
++        return;
++    }
++    closeAppWindows();
++}
++#endif
++
+ std::wstring CAscApplicationManagerWrapper::GetExternalSchemeName()
+ {
+     std::wstring scheme = CAscApplicationManager::GetExternalSchemeName();
+@@ -347,6 +554,16 @@ bool CAscApplicationManagerWrapper::processCommonEvent(NSEditorApi::CAscCefMenuE
+ //            RELEASEINTERFACE(event);
+             return true;
+         } else
++#ifdef _WIN32
++        if (cmd.compare(L"kalyptik:update") == 0) {
++            beginKalyptikUpdate(QString::fromStdWString(pData->get_Param()));
++            return true;
++        } else
++        if (cmd.compare(L"kalyptik:update-install") == 0) {
++            installKalyptikUpdate();
++            return true;
++        } else
++#endif
+ #ifdef _UPDMODULE
+         if ( !(cmd.find(L"updates:action") == std::wstring::npos) ) {   // params: check, download, install, abort
+             if (m_pUpdateManager) {
+diff --git a/win-linux/src/cascapplicationmanagerwrapper.h b/win-linux/src/cascapplicationmanagerwrapper.h
+index e32c8f310..69ecab8c3 100644
+--- a/win-linux/src/cascapplicationmanagerwrapper.h
++++ b/win-linux/src/cascapplicationmanagerwrapper.h
+@@ -32,6 +32,9 @@
+ #include <QDesktopServices>
+ #include <vector>
+ #include <memory>
++#ifdef _WIN32
++#include <QNetworkAccessManager>
++#endif
+ #include "ccefeventstransformer.h"
+ #include "ccefeventsgate.h"
+ #include "windows/ceditorwindow.h"
+@@ -117,6 +120,11 @@ private:
+ 
+     std::shared_ptr<CThemes> m_themes;
+     static bool m_rtlEnabled;
++#ifdef _WIN32
++    QNetworkAccessManager *m_kalyptikUpdateNetwork = nullptr;
++    bool m_kalyptikUpdateInProgress = false;
++    QString m_kalyptikUpdateInstallerPath;
++#endif
+ 
+ public:
+     CWindowsQueue<sWinTag>& closeQueue();
+@@ -138,6 +146,10 @@ private:
+     void applyTheme(const std::wstring&, bool force = false);
+     void handleDeeplinkActions(const std::vector<std::wstring>& actions);
+     void setHasFrameFeature(CCefView*, const std::wstring&, int);
++#ifdef _WIN32
++    void beginKalyptikUpdate(const QString&);
++    void installKalyptikUpdate();
++#endif
+ 
+     CMainWindow * prepareMainWindow(const QRect& r = QRect());
+     CMainWindow * mainWindowFromViewId(int uid) const;

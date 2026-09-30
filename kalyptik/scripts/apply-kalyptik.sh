@@ -21,10 +21,10 @@ for dir in kalyptik/patches/*/; do
   sub=$(basename "$dir")
   for patch in "$dir"*.patch; do
     [ -e "$patch" ] || continue
-    if git -C "$sub" apply --reverse --check "../$patch" 2>/dev/null; then
+    if git -C "$sub" apply --unidiff-zero --reverse --check "../$patch" 2>/dev/null; then
       echo "   déjà appliqué : $patch"
     else
-      git -C "$sub" apply "../$patch"
+      git -C "$sub" apply --unidiff-zero "../$patch"
       echo "   appliqué      : $patch"
     fi
   done

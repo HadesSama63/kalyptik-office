@@ -1,0 +1,24 @@
+diff --git a/common/Charts/ChartsDrawer.js b/common/Charts/ChartsDrawer.js
+index dc0100a671..5916df560b 100644
+--- a/common/Charts/ChartsDrawer.js
++++ b/common/Charts/ChartsDrawer.js
+@@ -18523,0 +18524,9 @@ CErrBarsDraw.prototype = {
++					const trendlineLabel = attributes.trendlineLbl;
++					if (trendlineLabel && (attributes.dispEq || attributes.dispEq === null ||
++						attributes.dispRSqr || attributes.dispRSqr === null)) {
++						trendlineLabel.recalcInfo.recalculateTxBody = true;
++						trendlineLabel.recalcInfo.recalculateContent = true;
++						trendlineLabel.recalcInfo.recalculateTransform = true;
++						trendlineLabel.recalcInfo.recalculateTransformText = true;
++						trendlineLabel.recalculate();
++					}
+diff --git a/common/Drawings/Format/ChartFormat.js b/common/Drawings/Format/ChartFormat.js
+index b1f7d6bca6..d21d5a8c47 100644
+--- a/common/Drawings/Format/ChartFormat.js
++++ b/common/Drawings/Format/ChartFormat.js
+@@ -15144,0 +15145,5 @@
++        if (this.dispRSqr && AscFormat.isRealNumber(oDrawerData.rSquared)) {
++            oRun = new AscWord.ParaRun(oParagraph, false);
++            oRun.AddText("  R² = " + r(oDrawerData.rSquared));
++            oParagraph.AddToContentToEnd(oRun);
++        }

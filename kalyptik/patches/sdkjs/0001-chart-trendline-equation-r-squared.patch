@@ -111,7 +111,7 @@ diff --git a/common/apiCommon.js b/common/apiCommon.js
 index bffd3c1fb9..be14c24c43 100644
 --- a/common/apiCommon.js
 +++ b/common/apiCommon.js
-@@ -1917,6 +1917,24 @@ function (window, undefined) {
+@@ -1917,6 +1917,25 @@ function (window, undefined) {
  			oLogicDocument.Recalculate();
  		}
  	};
@@ -126,6 +126,7 @@ index bffd3c1fb9..be14c24c43 100644
 +			AscCommon.History.Remove_LastPoint();
 +			return false;
 +		}
++		this.putDisplayTrendlinesEquation(bShow);
 +		this.updateChart();
 +		const oLogicDocument = Asc.editor.getLogicDocument();
 +		if (oLogicDocument) {

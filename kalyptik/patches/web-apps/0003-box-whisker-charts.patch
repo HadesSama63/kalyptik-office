@@ -36,7 +36,7 @@ new file mode 100644
 index 0000000000..c68d4d84ff
 --- /dev/null
 +++ b/apps/spreadsheeteditor/main/app/view/BoxWhiskerDialog.js
-@@ -0,0 +1,253 @@
+@@ -0,0 +1,252 @@
 +/*
 + * (c) Copyright Ascensio System SIA 2010-2024
 + *
@@ -99,7 +99,6 @@ index 0000000000..c68d4d84ff
 +            this.$window.find('#box-whisker-count').on('change', _.bind(this.renderInputs, this));
 +            this.$window.find('.dlg-btn').on('click', _.bind(this.onBtnClick, this));
 +            this.renderInputs();
-+            this.afterRender();
 +        },
 +
 +        renderInputs: function() {

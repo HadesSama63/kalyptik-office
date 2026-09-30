@@ -22,6 +22,8 @@
 
 #### Spreadsheet Editor
 
+* Fixed display of trendline equations and coefficients of determination, and the
+  box-and-whisker dialog crash
 * Fixed the issue of displaying the comment author's name when opening a spreadsheet
 
 ## 9.3.0

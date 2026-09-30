@@ -6,11 +6,12 @@ Au démarrage (puis toutes les 12 h), l'écran d'accueil compare la version
 installée à la dernière version publiée dans l'onglet **Releases** du dépôt.
 Si elle est plus récente, une carte « Nouvelle version disponible » propose :
 
-- **Télécharger** : sous Windows, télécharge et vérifie l'installeur avant de
-  demander confirmation pour fermer les documents, installer la mise à jour et
+- **Télécharger** : sous Windows, lance directement le téléchargement vérifié
+  et affiche sa progression dans la carte. Une fois le fichier vérifié, un bouton
+  de confirmation permet de fermer les documents, installer la mise à jour et
   relancer Kalyptik Office. L'installeur reprend la langue et le dossier
   précédemment choisis ; Windows peut demander une autorisation UAC. Sous Linux,
-  le bouton ouvre le paquet `.deb` ou `.rpm` dans le navigateur pour installation
+  le bouton propose le paquet `.deb` ou `.rpm` dans le navigateur pour installation
   par l'utilisateur ;
 - **Nouveautés** : la page de la version ;
 - **Plus tard** : masque cette version (la suivante sera de nouveau proposée).
@@ -20,7 +21,9 @@ Code : `kalyptik-update.js`, copié dans l'écran d'accueil au build
 
 La mise à jour Windows utilise le condensat SHA-256 fourni par l'API des releases
 GitHub et ne lance pas le fichier si son téléchargement ou sa vérification échoue.
-Après la confirmation, les éditeurs suivent leur parcours habituel de fermeture :
+Les confirmations et les erreurs sont affichées dans la carte de mise à jour
+plutôt que dans une boîte de dialogue du navigateur intégré. Après confirmation,
+les éditeurs suivent leur parcours habituel de fermeture :
 les documents non enregistrés peuvent donc encore être sauvegardés ou faire
 annuler la fermeture. Le processus d'installation ne démarre qu'après la fermeture
 de l'application.

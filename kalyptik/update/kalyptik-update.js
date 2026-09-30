@@ -59,6 +59,10 @@
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
                 <button data-act="download" style="border:0;border-radius:6px;padding:6px 14px;cursor:pointer;
                     background:var(--background-primary-button, #1D748F);color:var(--text-inverse, #fff)">Télécharger</button>
+                <button data-act="install" style="display:none;border:0;border-radius:6px;padding:6px 14px;cursor:pointer;
+                    background:var(--background-primary-button, #1D748F);color:var(--text-inverse, #fff)">Installer maintenant</button>
+                <button data-act="cancel-install" style="display:none;border:0;border-radius:6px;padding:6px 14px;cursor:pointer;
+                    background:transparent;color:var(--text-secondary, #555)">Plus tard</button>
                 <a href="#" data-act="notes" class="link" style="color:var(--text-link, #1D748F)">Nouveautés</a>
                 <a href="#" data-act="later" style="margin-left:auto;color:var(--text-secondary, #555)">Plus tard</a>
             </div>`;
@@ -72,18 +76,55 @@
                     Number.isSafeInteger(asset.size) && asset.size > 0 && asset.size <= 1500000000 &&
                     window.sdk && typeof window.sdk.execCommand == 'function';
                 if ( canInstall ) {
-                    if ( !window.confirm('Télécharger et vérifier la mise à jour ? Une seconde confirmation sera demandée avant la fermeture des documents et l’installation.') )
-                        return;
-                    card.querySelector('[data-status]').textContent = 'Préparation du téléchargement…';
-                    card.querySelector('[data-status]').style.display = 'block';
-                    window.sdk.execCommand('kalyptik:update', JSON.stringify({
-                        url: asset.browser_download_url,
-                        digest: asset.digest,
-                        size: asset.size,
-                    }));
+                    const status = card.querySelector('[data-status]');
+                    const downloadButton = card.querySelector('[data-act="download"]');
+                    status.textContent = 'Préparation du téléchargement…';
+                    status.style.display = 'block';
+                    downloadButton.disabled = true;
+                    try {
+                        window.sdk.execCommand('kalyptik:update', JSON.stringify({
+                            url: asset.browser_download_url,
+                            digest: asset.digest,
+                            size: asset.size,
+                        }));
+                    } catch (error) {
+                        downloadButton.disabled = false;
+                        status.textContent = 'Impossible de démarrer le téléchargement intégré.';
+                    }
                 } else if ( asset && asset.browser_download_url ) {
-                    window.open(asset.browser_download_url);
-                } else window.open(notesUrl);
+                    const status = card.querySelector('[data-status]');
+                    status.textContent = 'Le téléchargement intégré n’est pas disponible. Téléchargez l’installeur manuellement : ';
+                    status.style.display = 'block';
+                    const link = document.createElement('a');
+                    link.href = asset.browser_download_url;
+                    link.target = '_blank';
+                    link.rel = 'noopener';
+                    link.textContent = 'Télécharger l’installeur';
+                    link.style.color = 'var(--text-link, #1D748F)';
+                    status.appendChild(link);
+                } else {
+                    const status = card.querySelector('[data-status]');
+                    status.textContent = 'Aucun installeur compatible n’est disponible pour cette version.';
+                    status.style.display = 'block';
+                }
+            }
+            else if ( act == 'install' ) {
+                const status = card.querySelector('[data-status]');
+                status.textContent = 'Préparation de l’installation… Les documents ouverts suivront leur parcours habituel de sauvegarde.';
+                card.querySelector('[data-act="install"]').disabled = true;
+                card.querySelector('[data-act="cancel-install"]').disabled = true;
+                try {
+                    window.sdk.execCommand('kalyptik:update-install', '');
+                } catch (error) {
+                    status.textContent = 'Impossible de démarrer l’installation. Le fichier vérifié est conservé ; vous pouvez réessayer.';
+                    card.querySelector('[data-act="install"]').disabled = false;
+                    card.querySelector('[data-act="cancel-install"]').disabled = false;
+                }
+            }
+            else if ( act == 'cancel-install' ) {
+                card.querySelector('[data-status]').textContent = 'Mise à jour téléchargée et vérifiée ; installation reportée.';
+                card.querySelector('[data-act="install"]').style.display = 'none';
+                card.querySelector('[data-act="cancel-install"]').style.display = 'none';
             }
             else if ( act == 'notes' ) window.open(notesUrl);
             else { storage.set(DISMISSED, latest); card.remove(); }
@@ -116,21 +157,28 @@
                 const card = document.getElementById('kalyptik-update');
                 const status = card && card.querySelector('[data-status]');
                 if ( update.state == 'ready' ) {
-                    if ( window.confirm('Le téléchargement est terminé et vérifié. Kalyptik Office va demander la sauvegarde des documents ouverts, se fermer, installer la mise à jour puis redémarrer. Continuer ?') )
-                        window.sdk.execCommand('kalyptik:update-install', '');
-                    else if ( status ) status.textContent = 'Mise à jour téléchargée ; installation annulée.';
+                    if ( status ) {
+                        status.textContent = 'Téléchargement terminé et vérifié. Confirmez pour fermer les documents, installer la mise à jour et relancer Kalyptik Office.';
+                        card.querySelector('[data-act="download"]').style.display = 'none';
+                        card.querySelector('[data-act="install"]').style.display = 'inline-block';
+                        card.querySelector('[data-act="cancel-install"]').style.display = 'inline-block';
+                    }
                 } else if ( update.state == 'downloading' && status ) {
                     status.textContent = update.progress >= 0 ?
                         `Téléchargement de la mise à jour… ${update.progress}%` :
                         'Téléchargement de la mise à jour…';
                 } else if ( update.state == 'error' ) {
-                    if ( status ) status.textContent = update.message || 'Le téléchargement ou la vérification a échoué.';
-                    else window.alert(update.message || 'Le téléchargement ou la vérification a échoué.');
+                    if ( status ) {
+                        status.textContent = update.message || 'Le téléchargement ou la vérification a échoué.';
+                        card.querySelector('[data-act="download"]').disabled = false;
+                        card.querySelector('[data-act="download"]').style.display = 'inline-block';
+                        card.querySelector('[data-act="install"]').style.display = 'none';
+                        card.querySelector('[data-act="cancel-install"]').style.display = 'none';
+                    }
                 }
             } catch (e) {
                 const status = document.querySelector('#kalyptik-update [data-status]');
                 if ( status ) status.textContent = 'La réponse du programme de mise à jour est invalide.';
-                else window.alert('La réponse du programme de mise à jour est invalide.');
             }
             return;
         }

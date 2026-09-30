@@ -18,12 +18,12 @@
 * Windows installer reuses the previously selected language and installation folder
   when upgrading
 * Windows updates can be downloaded, verified, installed, and restarted from the
-  start page after confirmation
+  start page, with progress and installation confirmation shown inline
 
 #### Spreadsheet Editor
 
-* Fixed display of trendline equations and coefficients of determination, and the
-  box-and-whisker dialog crash
+* Fixed rendering of trendline equation and R² labels, and the box-and-whisker
+  dialog crash
 * Fixed the issue of displaying the comment author's name when opening a spreadsheet
 
 ## 9.3.0

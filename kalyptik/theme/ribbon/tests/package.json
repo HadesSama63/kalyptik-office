@@ -1,0 +1,6 @@
+{
+  "name": "kalyptik-ribbon-validation",
+  "private": true,
+  "scripts": {"test": "node browser.cjs"},
+  "devDependencies": {"@playwright/test": "1.63.0", "less": "4.3.0"}
+}

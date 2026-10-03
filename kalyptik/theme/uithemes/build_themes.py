@@ -195,7 +195,7 @@ LIGHT_START = {
     "highlight-accent-button-hover": "#17657D",
     "highlight-accent-button-pressed": "#125669",
     "highlight-sidebar-item-pressed": "#FFFFFF",
-    "highlight-toolbar-tab-underline-document": "#1D748F",
+    "highlight-toolbar-tab-underline-document": "#2563EB",
     "border-tabbar": "#D5DCE7",
     "chb-background-checked": "#1D748F",
     "chb-border-checked": "#1D748F",
@@ -233,10 +233,10 @@ DARK["toolbar-header-draw"] = DARK["toolbar-header-visio"]
 # alpha 0-255) : une couleur semi-transparente CSS y devient illisible
 # (texte gris sur fond noir). Ces clés ne servent qu'à Qt.
 NATIVE_LIGHT = {
-    "brand-word": "#EEF1F6", "brand-slide": "#EEF1F6", "brand-cell": "#EEF1F6",
-    "brand-pdf": "#EEF1F6", "brand-draw": "#EEF1F6",
+    "brand-word": "#070D18", "brand-slide": "#070D18", "brand-cell": "#070D18",
+    "brand-pdf": "#070D18", "brand-draw": "#070D18",
     "window-background": "#FFFFFF", "window-border": "#D5DCE7",
-    "text-pretty": "#1A2130",
+    "text-pretty": "#FFFFFF",
     "tool-button-background": "#EEF1F6", "tool-button-hover-background": "#E2E7EF",
     "tool-button-pressed-background": "#D5DCE7", "tool-button-active-background": "#FFFFFF",
     "download-widget-background": "#FFFFFF", "download-widget-border": "#D5DCE7",
@@ -282,6 +282,24 @@ NATIVE_DARK = {
 # Clés communes aux éditeurs et à Qt : valeurs opaques (même rendu, lisible par Qt)
 LIGHT.update({"text-normal": "#2A303B", "text-normal-pressed": "#2A303B", "text-toolbar-header": "#2A303B"})
 DARK.update({"text-normal": "#F2F3F4", "text-normal-pressed": "#F2F3F4", "text-toolbar-header": "#F2F3F4"})
+
+# Ruban « Office × Kalyptik » : hauteur partagée avec le moteur de disposition.
+# 60 px de commandes, 12 px au-dessus, 34 px pour les libellés et leur respiration.
+# Le corps du document conserve sa propre police ; ceci ne concerne que l'UI.
+RIBBON = {
+    "font-family-base": '"Plus Jakarta Sans", "Segoe UI", Arial, sans-serif',
+    "font-size-base": "12px",
+    "toolbar-height-controls": "106px",
+    "toolbar-group-height": "60px",
+    "toolbar-small-btn-margin-top": "12px",
+    "border-radius-toolbar": "8px",
+    "border-radius-button-toolbar": "5px",
+    "layout-padding-toolbar": "0 8px",
+    "shadow-toolbar": "none",
+    "shadow-toolbar-style-off": "none",
+}
+LIGHT.update(RIBBON)
+DARK.update(RIBBON)
 
 THEMES = [
     {"file": "kalyptik-light.json", "id": "theme-kalyptik-light", "type": "light",

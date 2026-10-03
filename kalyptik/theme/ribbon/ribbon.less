@@ -1,0 +1,122 @@
+// Kalyptik Office · approved concept M5maoYPFtxtTqwvnFrwqGT / 2:251.
+// Imported last by each desktop editor. Scope every override to Kalyptik themes.
+// install.py embeds the font; no CDN and no dependency on LESS's 32 KB URI limit.
+@font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: normal;
+    font-weight: 200 800;
+    font-display: swap;
+    src: url('data:font/woff2;base64,KALYPTIK_FONT_BASE64') format('woff2');
+}
+
+.theme-kalyptik-light, .theme-kalyptik-dark {
+    #toolbar {
+        background: var(--background-pane);
+
+        .toolbar, .box-tabs, .tabs, .box-tabs .extra {
+            background: var(--background-pane);
+        }
+
+        .box-controls {
+            // Keep the editor's height token authoritative: canvas positioning,
+            // folded state and overflow calculations all use the same value.
+            padding-top: 12px;
+            padding-bottom: 30px;
+            box-shadow: inset 0 0 0 1px var(--border-toolbar);
+            border-radius: 8px;
+        }
+
+        .box-controls::before { box-shadow: none; pointer-events: none; }
+
+        .tabs li {
+            border-radius: 5px 5px 0 0;
+            & > a { color: var(--text-normal); font-weight: 500; }
+            &.active {
+                background: transparent;
+                box-shadow: none;
+                & > a { color: @tab-toolbar; font-weight: 700; }
+                &::after {
+                    content: '';
+                    position: absolute;
+                    inset-inline: 12px;
+                    bottom: 4px;
+                    width: auto;
+                    height: 3px;
+                    margin: 0;
+                    border: 0;
+                    border-radius: 2px;
+                    background: @tab-toolbar;
+                    opacity: 1;
+                }
+            }
+            &:hover:not(.active) { background: var(--highlight-button-hover); }
+        }
+
+        .box-tabs .extra {
+            --text-toolbar-header: var(--text-normal);
+            --icon-toolbar-header: var(--icon-normal);
+            --highlight-header-button-hover: var(--highlight-button-hover);
+            --highlight-header-button-pressed: var(--highlight-button-pressed);
+        }
+
+        .group[data-kalyptik-label] {
+            min-width: var(--kalyptik-group-min-width);
+        }
+        .group[data-kalyptik-label]::after {
+            content: attr(data-kalyptik-label);
+            position: absolute;
+            inset-inline: 4px;
+            bottom: -21px;
+            line-height: 16px;
+            font-size: 10px;
+            font-weight: 500;
+            text-align: center;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            pointer-events: none;
+        }
+
+        .separator.long { background-color: var(--border-divider); }
+        .btn-toolbar { border-radius: 5px; }
+        .btn-toolbar:focus-visible, .tabs a:focus-visible {
+            outline: 2px solid var(--border-control-focus);
+            outline-offset: -2px;
+        }
+        .field-styles .style { border-radius: 5px; }
+
+        // The compact/overflow layouts are managed by Mixtbar, not a second
+        // responsive implementation. Decorative labels never affect widths.
+        .more-container {
+            padding-bottom: 28px;
+            border: 1px solid var(--border-toolbar);
+            border-radius: 8px;
+        }
+        .toolbar-view .box-controls { padding-bottom: 12px; }
+    }
+
+    #box-document-title {
+        background: #070d18;
+        color: #ffffff;
+        --text-toolbar-header: #ffffff;
+        --icon-toolbar-header: #ffffff;
+        --highlight-header-button-hover: #1a2338;
+        --highlight-header-button-pressed: #26324a;
+        --highlight-header-input-hover: #1a2338;
+        --highlight-header-input-pressed: #141c2e;
+        --border-header-input-focused: #32b8c6;
+        #title-doc-name { color: #ffffff; }
+        .btn-header .caption { color: #ffffff; }
+        .dropdown-menu { color: var(--text-normal); }
+    }
+
+    #statusbar { border-top: 1px solid var(--border-divider); }
+}
+
+@media (max-width: 900px) {
+    .theme-kalyptik-light #toolbar, .theme-kalyptik-dark #toolbar {
+        .tabs li > a { padding-inline: 9px; }
+        .group[data-kalyptik-label]::after { font-size: 9px; }
+    }
+}

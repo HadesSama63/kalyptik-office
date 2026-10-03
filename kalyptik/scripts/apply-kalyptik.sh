@@ -12,6 +12,7 @@
 #   4. thèmes d'interface        kalyptik/theme/uithemes/*.json
 #   5. traductions françaises    kalyptik/i18n/complete_fr.py
 #   6. mises à jour              kalyptik/update/kalyptik-update.js
+#   7. rubans et typographie     kalyptik/theme/ribbon/
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 PYTHON=$(command -v python3 || command -v python)
@@ -48,5 +49,8 @@ echo "== 5. Traductions françaises manquantes"
 echo "== 6. Notification de nouvelle version"
 cp kalyptik/update/kalyptik-update.js desktop-apps/common/loginpage/src/
 echo "   kalyptik-update.js copié"
+
+echo "== 7. Rubans et typographie Kalyptik"
+"$PYTHON" kalyptik/theme/ribbon/install.py
 
 echo "Kalyptik Office appliqué."

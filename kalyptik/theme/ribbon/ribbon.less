@@ -114,6 +114,43 @@
     #statusbar { border-top: 1px solid var(--border-divider); }
 }
 
+.theme-kalyptik-dark {
+    #box-document-title {
+        background: #281b46;
+        --highlight-header-button-hover: #493467;
+        --highlight-header-button-pressed: #5b417d;
+    }
+
+    // Raster toolbar sprites do not inherit SVG fill or text colors.
+    // Whiten only command glyphs, preserving their alpha and disabled opacity.
+    #toolbar .toolbar__icon:not(svg),
+    #toolbar .menu__icon:not(svg),
+    #box-document-title .toolbar__icon:not(svg) {
+        filter: brightness(0) invert(1);
+    }
+    #toolbar svg.icon, #toolbar svg.menu-item-icon,
+    #box-document-title svg.icon {
+        color: var(--icon-normal);
+        fill: var(--icon-normal);
+    }
+}
+
+// Match the 40 px chart thumbnails; the old 20 px icon drew only 12 px of ink.
+.menu-item-box-whisker {
+    min-height: 52px;
+    display: flex !important;
+    align-items: center;
+    gap: 10px;
+    svg.menu-item-icon {
+        position: static !important;
+        flex: 0 0 40px;
+        width: 40px !important;
+        height: 40px !important;
+        margin: 0 !important;
+        fill: var(--icon-normal);
+    }
+}
+
 @media (max-width: 900px) {
     .theme-kalyptik-light #toolbar, .theme-kalyptik-dark #toolbar {
         .tabs li > a { padding-inline: 9px; }

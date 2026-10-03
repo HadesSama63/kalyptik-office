@@ -26,7 +26,12 @@ plutôt que dans une boîte de dialogue du navigateur intégré. Après confirma
 les éditeurs suivent leur parcours habituel de fermeture :
 les documents non enregistrés peuvent donc encore être sauvegardés ou faire
 annuler la fermeture. Le processus d'installation ne démarre qu'après la fermeture
-de l'application.
+de l'application. L’assistant Windows reste visible après l’autorisation UAC :
+ses étapes, sa progression et son bouton de relance restent accessibles.
+Le lanceur ne redémarre pas l’application en cas d’échec ou d’annulation et
+conserve alors l’installeur vérifié. Inno Setup écrit un journal `Setup Log*.txt`
+dans le dossier temporaire. Un succès demandant un redémarrage Windows (3010)
+n’est pas traité comme un échec.
 
 ## Publier une version
 

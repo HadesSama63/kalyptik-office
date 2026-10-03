@@ -1,0 +1,26 @@
+diff --git a/win-linux/src/cascapplicationmanagerwrapper.cpp b/win-linux/src/cascapplicationmanagerwrapper.cpp
+--- a/win-linux/src/cascapplicationmanagerwrapper.cpp
++++ b/win-linux/src/cascapplicationmanagerwrapper.cpp
+@@ -310,10 +310,9 @@
+         "$deadline = (Get-Date).AddMinutes(10)\n"
+         "while ((Get-Process -Id $processId -ErrorAction SilentlyContinue) -and (Get-Date) -lt $deadline) { Start-Sleep -Milliseconds 500 }\n"
+         "if (Get-Process -Id $processId -ErrorAction SilentlyContinue) { Remove-Item -LiteralPath $PSCommandPath -Force; exit 1 }\n"
+-        "try { $setup = Start-Process -FilePath $installer -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/CLOSEAPPLICATIONS' -Wait -PassThru } catch { $setup = $null }\n"
+-        "if (($null -eq $setup) -or ($setup.ExitCode -ne 0)) { Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show('La mise à jour a échoué. Kalyptik Office va redémarrer avec la version actuelle.') | Out-Null }\n"
+-        "if (Test-Path -LiteralPath $application) { Start-Process -FilePath $application }\n"
+-        "Remove-Item -LiteralPath $installer -Force\n"
++        "try { $setup = Start-Process -FilePath $installer -ArgumentList '/NORESTART','/RESTARTEXITCODE=3010','/LOG','/CLOSEAPPLICATIONS' -Verb RunAs -WindowStyle Normal -Wait -PassThru -ErrorAction Stop } catch { $setup = $null }\n"
++        "if (($null -eq $setup) -or ($setup.ExitCode -notin @(0, 3010))) { Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show('Installation annulée ou non terminée. Le fichier téléchargé est conservé : ' + $installer) | Out-Null }\n"
++        "if (($null -ne $setup) -and ($setup.ExitCode -in @(0, 3010))) { Remove-Item -LiteralPath $installer -Force }\n"
+         "Remove-Item -LiteralPath $PSCommandPath -Force\n")
+         .arg(quotePowerShell(m_kalyptikUpdateInstallerPath),
+              quotePowerShell(appPath),
+@@ -332,7 +331,7 @@
+         qEnvironmentVariable("SystemRoot") + QStringLiteral("/System32/WindowsPowerShell/v1.0/powershell.exe"));
+     if (!QFileInfo::exists(powershell) || !QProcess::startDetached(powershell,
+             {QStringLiteral("-NoProfile"), QStringLiteral("-ExecutionPolicy"), QStringLiteral("Bypass"),
+-             QStringLiteral("-File"), scriptPath}, QDir::tempPath())) {
++             QStringLiteral("-WindowStyle"), QStringLiteral("Hidden"), QStringLiteral("-File"), scriptPath}, QDir::tempPath())) {
+         QFile::remove(scriptPath);
+         sendKalyptikUpdateState(QStringLiteral("error"),
+             QStringLiteral("Impossible de démarrer l’installation de la mise à jour."));

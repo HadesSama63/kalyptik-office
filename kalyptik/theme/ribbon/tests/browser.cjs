@@ -94,7 +94,29 @@ const editors = ['documenteditor','spreadsheeteditor','presentationeditor','pdfe
     assert(await page.evaluate(()=>document.fonts.check('12px "Plus Jakarta Sans"')),'font loaded offline');
     const geometry=await page.locator('.box-controls').first().evaluate(n=>({height:n.getBoundingClientRect().height,background:getComputedStyle(n).backgroundColor}));
     assert.equal(geometry.height,106,'shared toolbar height');
-    assert.equal(geometry.background,mode==='light'?'rgb(255, 255, 255)':'rgb(15, 22, 36)');
+    assert.equal(geometry.background,mode==='light'?'rgb(255, 255, 255)':'rgb(53, 36, 80)');
+    if (mode==='dark') {
+     const luminance = hex => {
+      const rgb=hex.match(/[0-9a-f]{2}/gi).map(v=>parseInt(v,16)/255)
+       .map(v=>v<=0.04045?v/12.92:((v+0.055)/1.055)**2.4);
+      return rgb[0]*0.2126+rgb[1]*0.7152+rgb[2]*0.0722;
+     };
+     for (const foreground of ['text-normal','text-secondary','icon-normal']) {
+      const contrast=(luminance(theme.colors[foreground])+0.05)/(luminance(theme.colors['background-toolbar'])+0.05);
+      assert(contrast>=4.5,foreground+' must remain readable on the purple ribbon');
+     }
+     await page.evaluate(()=>{
+      const raster=document.createElement('i');raster.className='toolbar__icon';raster.id='raster-proof';
+      document.getElementById('toolbar').append(raster);
+     });
+     const raster=await page.locator('#raster-proof').evaluate(n=>getComputedStyle(n).filter);
+     assert.equal(raster,'brightness(0) invert(1)','raster icons must also be light');
+     await page.locator('#raster-proof').evaluate(n=>n.remove());
+     if (await page.locator('#toolbar svg.icon').count()) {
+      const vector=await page.locator('#toolbar svg.icon').first().evaluate(n=>getComputedStyle(n).color);
+      assert.equal(vector,'rgb(245, 240, 255)','stroke icons using currentColor must be light');
+     }
+    }
     const clippedLabels=await page.locator('[data-kalyptik-label]').evaluateAll(nodes=>nodes.filter(n=>{
      if(!n.getBoundingClientRect().width)return false;
      const style=getComputedStyle(n,'::after');

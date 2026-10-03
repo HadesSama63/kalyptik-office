@@ -1,0 +1,16 @@
+diff --git a/apps/spreadsheeteditor/main/app/view/Toolbar.js b/apps/spreadsheeteditor/main/app/view/Toolbar.js
+--- a/apps/spreadsheeteditor/main/app/view/Toolbar.js
++++ b/apps/spreadsheeteditor/main/app/view/Toolbar.js
+@@ -2922,9 +2922,9 @@
+                             caption: this.textBoxWhiskerChart,
+                             template: _.template(
+                                 '<a id="<%= id %>" class="menu-item menu-item-box-whisker" tabindex="-1" type="menuitem">' +
+-                                '<svg class="menu-item-icon uni-scale" width="20" height="20" viewBox="0 0 40 40" aria-hidden="true">' +
+-                                '<path fill-rule="evenodd" clip-rule="evenodd" d="M8 20H13V14H27V20H32V21H27V26H13V21H8V20ZM14 15V25H26V15H14ZM19.5 15V25H20.5V15H19.5ZM10 17V23H11V17H10ZM29 17V23H30V17H29Z"/>' +
+-                                '<path opacity=".45" d="M14 15H26V25H14V15Z"/>' +
++                                '<svg class="menu-item-icon uni-scale" width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">' +
++                                '<path fill-rule="evenodd" clip-rule="evenodd" d="M12 10H28V19H34V14H36V26H34V21H28V30H12V21H6V26H4V14H6V19H12V10ZM14 12V28H19V12H14ZM21 12V28H26V12H21Z"/>' +
++                                '<path opacity=".45" d="M14 12H26V28H14Z"/>' +
+                                 '</svg>' +
+                                 '<%- caption %>' +
+                                 '</a>'

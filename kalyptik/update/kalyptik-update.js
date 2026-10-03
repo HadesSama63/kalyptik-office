@@ -158,7 +158,7 @@
                 const status = card && card.querySelector('[data-status]');
                 if ( update.state == 'ready' ) {
                     if ( status ) {
-                        status.textContent = 'Téléchargement terminé et vérifié. Confirmez pour fermer les documents, installer la mise à jour et relancer Kalyptik Office.';
+                        status.textContent = 'Téléchargement terminé et vérifié. Confirmez pour fermer les documents puis ouvrir l’assistant d’installation Windows. Sa dernière étape permet de relancer Kalyptik Office.';
                         card.querySelector('[data-act="download"]').style.display = 'none';
                         card.querySelector('[data-act="install"]').style.display = 'inline-block';
                         card.querySelector('[data-act="cancel-install"]').style.display = 'inline-block';

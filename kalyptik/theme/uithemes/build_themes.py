@@ -120,15 +120,15 @@ LIGHT = {
 
 DARK = {
     # Surfaces « feuilles » ProfZen : toile #070d18 -> feuille #0f1624 -> posée #141c2e
-    **per_app("toolbar-header", {a: "#070D18" for a in APPS_DARK}),
+    **per_app("toolbar-header", {a: "#281B46" for a in APPS_DARK}),
     **per_app("highlight-header-tab-underline", APPS_DARK),
     **per_app("highlight-toolbar-tab-underline", APPS_DARK),
 
     "background-normal": "#0F1624",
-    "background-toolbar": "#0F1624",
-    "background-toolbar-tab": "#0F1624",
-    "background-toolbar-additional": "#141C2E",
-    "background-pane": "#141C2E",
+    "background-toolbar": "#352450",
+    "background-toolbar-tab": "#352450",
+    "background-toolbar-additional": "#281B46",
+    "background-pane": "#281B46",
     "background-contrast-popover": "#1A2338",
     "background-primary-dialog-button": "#1D748F",
     "background-accent-button": "#1D748F",
@@ -147,7 +147,7 @@ DARK = {
     "highlight-category-button-pressed": "rgba(50, 184, 198, 0.16)",
 
     "border-toolbar": "rgba(255, 255, 255, 0.10)",
-    "border-toolbar-active-panel-top": "#070D18",
+    "border-toolbar-active-panel-top": "#281B46",
     "border-divider": "rgba(255, 255, 255, 0.10)",
     "border-regular-control": "rgba(255, 255, 255, 0.36)",
     "border-preview-hover": "#6FD3DD",
@@ -166,6 +166,10 @@ DARK = {
     "text-link-active": "#6FD3DD",
     "text-link-visited": "#32B8C6",
 
+    "icon-normal": "#F5F0FF",
+    "icon-normal-pressed": "#FFFFFF",
+    "icon-toolbar-header": "#F5F0FF",
+    "text-secondary": "#DED3F0",
     "icon-success": "#34D399",
 
     "canvas-background": "#070D18",
@@ -202,7 +206,7 @@ LIGHT_START = {
 }
 
 DARK_START = {
-    "background-tabbar": "#070D18",
+    "background-tabbar": "#281B46",
     "background-button": "#141C2E",
     "background-normal-element": "#141C2E",
     "background-normal-element-light": "#1A2338",
@@ -256,12 +260,12 @@ NATIVE_LIGHT = {
     "tab-default-active-text": "#070D18", "tab-divider": "#D5DCE7",
 }
 NATIVE_DARK = {
-    "brand-word": "#070D18", "brand-slide": "#070D18", "brand-cell": "#070D18",
-    "brand-pdf": "#070D18", "brand-draw": "#070D18",
+    "brand-word": "#281B46", "brand-slide": "#281B46", "brand-cell": "#281B46",
+    "brand-pdf": "#281B46", "brand-draw": "#281B46",
     "window-background": "#0F1624", "window-border": "#2E3A52",
     "text-pretty": "#F2F4F7",
-    "tool-button-background": "#070D18", "tool-button-hover-background": "#1F2A40",
-    "tool-button-pressed-background": "#26324A", "tool-button-active-background": "#141C2E",
+    "tool-button-background": "#281B46", "tool-button-hover-background": "#493467",
+    "tool-button-pressed-background": "#5B417D", "tool-button-active-background": "#352450",
     "download-widget-background": "#141C2E", "download-widget-border": "#2E3A52",
     "download-item-hover-background": "#1F2A40",
     "download-ghost-button-text": "#6FD3DD", "download-ghost-button-text-hover": "#F2F4F7",

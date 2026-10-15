@@ -1,0 +1,81 @@
+{
+  "name": "Examen 2027",
+  "nameLocale": {
+    "fr": "Examen 2027",
+    "en": "Exam 2027"
+  },
+  "guid": "asc.{F3A2B1C4-7D6E-4F80-9A1B-2C3D4E5F6A70}",
+  "version": "1.0.0",
+  "offered": "Kalyptik",
+  "variations": [
+    {
+      "description": "Sujets d'examens 2027 : règles typographiques, compétences évaluées et grille d'évaluation.",
+      "descriptionLocale": {
+        "fr": "Sujets d'examens 2027 : règles typographiques, compétences évaluées et grille d'évaluation.",
+        "en": "2027 exam papers: typography rules, assessed skills and skills grid."
+      },
+      "url": "index.html",
+      "icons": [
+        "resources/light/icon.png",
+        "resources/light/icon@2x.png"
+      ],
+      "icons2": [
+        {
+          "style": "light",
+          "100%": {
+            "normal": "resources/light/icon.png"
+          },
+          "125%": {
+            "normal": "resources/light/icon@1.25x.png"
+          },
+          "150%": {
+            "normal": "resources/light/icon@1.5x.png"
+          },
+          "175%": {
+            "normal": "resources/light/icon@1.75x.png"
+          },
+          "200%": {
+            "normal": "resources/light/icon@2x.png"
+          }
+        },
+        {
+          "style": "dark",
+          "100%": {
+            "normal": "resources/dark/icon.png"
+          },
+          "125%": {
+            "normal": "resources/dark/icon@1.25x.png"
+          },
+          "150%": {
+            "normal": "resources/dark/icon@1.5x.png"
+          },
+          "175%": {
+            "normal": "resources/dark/icon@1.75x.png"
+          },
+          "200%": {
+            "normal": "resources/dark/icon@2x.png"
+          }
+        }
+      ],
+      "isViewer": false,
+      "EditorsSupport": [
+        "word"
+      ],
+      "isVisual": true,
+      "isModal": false,
+      "isInsideMode": true,
+      "type": "panelRight",
+      "initDataType": "none",
+      "initData": "",
+      "isUpdateOleOnResize": false,
+      "buttons": [],
+      "events": [
+        "onTargetPositionChanged"
+      ],
+      "size": [
+        360,
+        600
+      ]
+    }
+  ]
+}

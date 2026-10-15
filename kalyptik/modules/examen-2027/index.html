@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Examen 2027</title>
+    <script type="text/javascript" src="../v1/plugins.js"></script>
+    <script type="text/javascript" src="../v1/plugins-ui.js"></script>
+    <link rel="stylesheet" href="../v1/plugins.css">
+    <link rel="stylesheet" href="resources/style.css">
+    <script type="text/javascript" src="scripts/rules.js"></script>
+    <script type="text/javascript" src="scripts/commands.js"></script>
+    <script type="text/javascript" src="scripts/plugin.js"></script>
+</head>
+<body>
+<div id="app">
+    <section class="card">
+        <h2>Mise en forme 2027</h2>
+        <p class="hint">Arial 12, texte aligné à gauche (non justifié), interligne 1,15.
+            Les titres gardent leur taille, les équations ne sont pas modifiées.</p>
+        <div class="row">
+            <select id="format-scope">
+                <option value="document">Tout le document</option>
+                <option value="selection">La sélection</option>
+            </select>
+            <button id="btn-format" class="btn primary">Appliquer</button>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>Vérification du sujet</h2>
+        <p class="hint">Règles typographiques des énoncés d'examens : ponctuation, nombres,
+            unités, ordinaux, guillemets, signe ×, locutions latines, souligné…</p>
+        <div class="row">
+            <button id="btn-analyze" class="btn primary">Analyser</button>
+            <button id="btn-fix-all" class="btn" disabled>Corriger la sélection</button>
+        </div>
+        <div id="analysis" class="list"></div>
+    </section>
+
+    <section class="card">
+        <h2>Compétences évaluées</h2>
+        <div id="competences" class="list"></div>
+        <div class="row">
+            <input id="new-code" class="code" placeholder="Code" maxlength="6">
+            <input id="new-label" class="grow" placeholder="Intitulé de la compétence">
+            <button id="btn-add-comp" class="btn">Ajouter</button>
+        </div>
+        <button id="btn-preset" class="link">Ajouter les 6 compétences de mathématiques</button>
+    </section>
+
+    <section class="card">
+        <h2>Question à l'emplacement du curseur</h2>
+        <p id="current-text" class="quote">Placez le curseur dans une question du sujet.</p>
+        <div class="row">
+            <label for="question-label">Repère</label>
+            <input id="question-label" class="grow" placeholder="ex. Ex. 1 – 2. a)">
+        </div>
+        <div id="question-comps" class="checks"></div>
+        <div class="row">
+            <button id="btn-tag" class="btn primary" disabled>Associer à la question</button>
+            <button id="btn-untag" class="btn" disabled>Retirer</button>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>Grille d'évaluation</h2>
+        <p id="grid-summary" class="hint"></p>
+        <label class="check"><input type="checkbox" id="show-markers" checked>
+            Afficher les compétences dans l'énoncé</label>
+        <button id="btn-grid" class="btn primary">Insérer / mettre à jour la grille</button>
+    </section>
+
+    <p id="status" class="status" role="status"></p>
+</div>
+</body>
+</html>

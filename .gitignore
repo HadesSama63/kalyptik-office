@@ -1,2 +1,3 @@
 .docker-cache/
 build_output.log
+build/kalyptik-plugins/

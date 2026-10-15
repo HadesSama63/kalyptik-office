@@ -1,0 +1,35 @@
+:root {
+    --k-bg: var(--background-normal, #fff);
+    --k-card: var(--background-toolbar, #f4f6fa);
+    --k-text: var(--text-normal, rgba(0, 0, 0, .85));
+    --k-muted: var(--text-secondary, rgba(0, 0, 0, .6));
+    --k-border: var(--border-regular-control, #d5dce7);
+    --k-accent: #1D748F;
+}
+html, body { background: var(--k-bg); color: var(--k-text); margin: 0; }
+body { font: 12px/1.45 "Segoe UI", Arial, Helvetica, sans-serif; }
+#app { padding: 10px 12px 24px; }
+.card { border: 1px solid var(--k-border); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; background: var(--k-card); }
+h2 { font-size: 13px; margin: 0 0 6px; }
+.hint { color: var(--k-muted); margin: 0 0 8px; }
+.row { display: flex; gap: 6px; align-items: center; margin: 6px 0; }
+.grow { flex: 1; min-width: 0; }
+input, select { border: 1px solid var(--k-border); border-radius: 6px; padding: 4px 6px; background: var(--k-bg); color: var(--k-text); font: inherit; }
+input.code { width: 52px; }
+.btn { border: 1px solid var(--k-border); border-radius: 6px; padding: 5px 10px; background: var(--k-bg); color: var(--k-text); cursor: pointer; font: inherit; }
+.btn.primary { background: var(--k-accent); border-color: var(--k-accent); color: #fff; }
+.btn:disabled { opacity: .45; cursor: default; }
+.link { border: 0; background: none; color: var(--k-accent); cursor: pointer; padding: 2px 0; font: inherit; text-decoration: underline; }
+.list .item { border-top: 1px solid var(--k-border); padding: 6px 0; display: flex; gap: 6px; align-items: flex-start; }
+.list .item:first-child { border-top: 0; }
+.item .body { flex: 1; min-width: 0; }
+.item .title { font-weight: 600; }
+.item .msg { color: var(--k-muted); }
+.item code { background: var(--k-bg); border: 1px solid var(--k-border); border-radius: 4px; padding: 0 3px; white-space: pre-wrap; word-break: break-word; }
+.item .count { color: var(--k-muted); }
+.ok { color: #059669; }
+.quote { border-left: 3px solid var(--k-accent); padding: 2px 8px; margin: 0 0 6px; color: var(--k-muted); max-height: 3.6em; overflow: hidden; }
+.checks { display: grid; grid-template-columns: 1fr; gap: 2px; margin: 4px 0; }
+.check { display: flex; gap: 6px; align-items: center; cursor: pointer; margin: 4px 0; }
+.status { color: var(--k-muted); min-height: 1.4em; margin: 0; }
+.comp-code { font-weight: 600; min-width: 34px; display: inline-block; }

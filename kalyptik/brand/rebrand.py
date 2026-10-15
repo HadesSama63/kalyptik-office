@@ -81,6 +81,12 @@ RULES = [
      '<script src="@@SRC_ROOT@@/apps/common/main/lib/util/docserviceworker.js?__inline=true"></script>\n'
      '    <script src="@@SRC_ROOT@@/apps/common/main/lib/util/kalyptik-fonts.js?__inline=true"></script>'),
 
+    # --- Modules Kalyptik (extensions préparées par apply-kalyptik.sh, étape 9)
+    ("build/.docker/desktop-composer.bake.Dockerfile",
+     "    WORKDIR /editors/sdkjs-plugins",
+     "    COPY build/kalyptik-plugins/ /editors/sdkjs-plugins/\n"
+     "    WORKDIR /editors/sdkjs-plugins"),
+
     # --- Propriétés de l'exécutable Windows
     (VERSION, '#define VER_FILEDESCRIPTION_STR     "Euro-Office Desktop Editors\\0"',
               f'#define VER_FILEDESCRIPTION_STR     "{SUITE}\\0"'),

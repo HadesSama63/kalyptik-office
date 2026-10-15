@@ -14,6 +14,7 @@
 #   6. mises à jour              kalyptik/update/kalyptik-update.js
 #   7. rubans et typographie     kalyptik/theme/ribbon/
 #   8. polices                   kalyptik/fonts/
+#   9. modules (extensions)      kalyptik/modules/  -> build/kalyptik-plugins/
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 PYTHON=$(command -v python3 || command -v python)
@@ -63,5 +64,20 @@ for dir in kalyptik/fonts/bundled/*/; do
 done
 cp kalyptik/fonts/kalyptik-fonts.js web-apps/apps/common/main/lib/util/
 echo "   $(ls desktop-apps/win-linux/res/kalyptik-fonts/*.[ot]tf | wc -l) fichiers de police copiés"
+
+echo "== 9. Modules (extensions des éditeurs)"
+# Chaque module est copié dans un dossier nommé d'après son GUID ; le kit v1
+# est partagé. Le Dockerfile « desktop-common » les place dans
+# editors/sdkjs-plugins/ où l'application charge les extensions système.
+rm -rf build/kalyptik-plugins
+mkdir -p build/kalyptik-plugins
+cp -r kalyptik/modules/v1 build/kalyptik-plugins/v1
+for dir in kalyptik/modules/*/; do
+  [ -f "$dir/config.json" ] || continue
+  guid=$("$PYTHON" -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["guid"].split(".", 1)[1])' "$dir/config.json")
+  mkdir -p "build/kalyptik-plugins/$guid"
+  (cd "$dir" && tar --exclude=tests --exclude='*.svg' -cf - .) | tar -xf - -C "build/kalyptik-plugins/$guid"
+  echo "   $(basename "$dir") -> $guid"
+done
 
 echo "Kalyptik Office appliqué."

@@ -357,12 +357,13 @@ jobs:
           TAG: v${{ env.PRODUCT_VERSION }}.${{ github.run_number }}
         run: |
           # installeur Windows sous un nom clair (le runtime vc_redist est déjà inclus dedans)
-          for exe in dist/kalyptik-office-windows-x64/*.exe; do
+          # (l'artefact garde le sous-dossier inno/ : on cherche partout dans dist/)
+          while IFS= read -r exe; do
             case "$(basename "$exe")" in
-              vc_redist*) rm "$exe" ;;
-              *) mv "$exe" "dist/kalyptik-office-windows-x64/Kalyptik-Office-${TAG#v}-x64.exe" ;;
+              vc_redist*) rm -v "$exe" ;;
+              *) mv -v "$exe" "$(dirname "$exe")/Kalyptik-Office-${TAG#v}-x64.exe" ;;
             esac
-          done 2>/dev/null || true
+          done < <(find dist -type f -name '*.exe')
           mapfile -t files < <(find dist -type f \( -name '*.exe' -o -name '*.deb' -o -name '*.rpm' \))
           printf '%s\n' "${files[@]}"
           [ ${#files[@]} -gt 0 ] || { echo "Aucun paquet à publier (cochez Linux et/ou Windows)"; exit 1; }

@@ -12,8 +12,16 @@
     var plugin = window.Asc.plugin;
 
     var LEVELS = ['Maîtrise insuffisante', 'Maîtrise fragile', 'Maîtrise satisfaisante', 'Très bonne maîtrise'];
-    var MATHS = [['CH', 'Chercher'], ['MO', 'Modéliser'], ['RE', 'Représenter'],
-                 ['RA', 'Raisonner'], ['CA', 'Calculer'], ['CO', 'Communiquer']];
+    // Couleurs lisibles à l'écran comme à l'impression, attribuées dans l'ordre
+    var PALETTE = ['#1F6FB2', '#7B3FA0', '#D9822B', '#2E8B3E', '#C0392B', '#0E8C8C', '#B5487A', '#6B7A1E'];
+    var PRESETS = {
+        bacpro: {name: 'Mathématiques – Bac pro / CAP', list: [
+            ['APP', 'S\'approprier', '#1F6FB2'], ['ANA', 'Analyser', '#7B3FA0'], ['REA', 'Réaliser', '#D9822B'],
+            ['VAL', 'Valider', '#2E8B3E'], ['COM', 'Communiquer', '#C0392B']]},
+        lycee: {name: 'Mathématiques – voies générale et technologique', list: [
+            ['CH', 'Chercher', '#1F6FB2'], ['MO', 'Modéliser', '#7B3FA0'], ['RE', 'Représenter', '#0E8C8C'],
+            ['RA', 'Raisonner', '#D9822B'], ['CA', 'Calculer', '#2E8B3E'], ['CO', 'Communiquer', '#C0392B']]}
+    };
 
     var state = {
         settings: {competences: [], show: true, title: "Grille d'évaluation des compétences", levels: LEVELS},
@@ -48,6 +56,7 @@
                 var saved = parse(s.settings, null);
                 if (saved && saved.competences) {
                     state.settings.competences = saved.competences;
+                    saved.competences.forEach(function (c) { if (!/^#[0-9a-f]{6}$/i.test(c.color || '')) c.color = nextColor(); });
                     state.settings.show = saved.show !== false;
                 }
             }
@@ -60,7 +69,7 @@
 
     function saveSettings(done) {
         run(C.saveSettings, {settings: JSON.stringify({
-            competences: state.settings.competences, show: state.settings.show, version: 1})}, done);
+            competences: state.settings.competences, show: state.settings.show, version: 2})}, done);
     }
 
     function compById(id) {
@@ -69,11 +78,28 @@
         return null;
     }
 
+    function rgb(hex) {
+        var m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex || '');
+        return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)] : [96, 96, 96];
+    }
+
+    function nextColor() {
+        var used = state.settings.competences.map(function (c) { return String(c.color).toUpperCase(); });
+        for (var i = 0; i < PALETTE.length; i++) if (used.indexOf(PALETTE[i]) < 0) return PALETTE[i];
+        return PALETTE[state.settings.competences.length % PALETTE.length];
+    }
+
+    // Texte du repère, en morceaux colorés : « [APP, REA] » (code de chaque compétence dans sa couleur)
     function displayFor(marker) {
-        if (!state.settings.show) return '​';
-        var codes = (marker.c || []).map(function (id) { var c = compById(id); return c ? c.code : null; })
-                                    .filter(Boolean);
-        return codes.length ? ' [' + codes.join(', ') + ']' : '​';
+        var comps = state.settings.show ? (marker.c || []).map(compById).filter(Boolean) : [];
+        if (!comps.length) return [{t: '​'}];
+        var parts = [{t: ' ['}];
+        comps.forEach(function (c, i) {
+            if (i) parts.push({t: ', '});
+            parts.push({t: c.code, c: rgb(c.color), b: true});
+        });
+        parts.push({t: ']'});
+        return parts;
     }
 
     // Repère proposé : début de la question (« 1. », « 2. a) », « b) »…)
@@ -98,11 +124,12 @@
     function renderCompetences() {
         var list = state.settings.competences;
         $('competences').innerHTML = list.length ? list.map(function (c) {
-            return '<div class="item"><span class="comp-code">' + esc(c.code) + '</span>' +
+            return '<div class="item"><input type="color" class="swatch" title="Couleur de la compétence" data-color="' + esc(c.id) + '" value="' + esc(c.color) + '">' +
+                   '<span class="comp-code" style="color:' + esc(c.color) + '">' + esc(c.code) + '</span>' +
                    '<span class="body">' + esc(c.label) + '</span>' +
                    '<button class="link" data-del="' + esc(c.id) + '">Supprimer</button></div>';
         }).join('') : '<p class="hint">Aucune compétence : ajoutez-les ci-dessous.</p>';
-        $('btn-preset').style.display = list.length ? 'none' : '';
+        $('new-color').value = nextColor();
     }
 
     function renderQuestion() {
@@ -113,7 +140,7 @@
         var selected = marker ? marker.c : [];
         $('question-comps').innerHTML = state.settings.competences.map(function (c) {
             return '<label class="check"><input type="checkbox" value="' + esc(c.id) + '"' +
-                   (selected.indexOf(c.id) >= 0 ? ' checked' : '') + '> <b>' + esc(c.code) + '</b> ' + esc(c.label) + '</label>';
+                   (selected.indexOf(c.id) >= 0 ? ' checked' : '') + '> <b style="color:' + esc(c.color) + '">' + esc(c.code) + '</b> ' + esc(c.label) + '</label>';
         }).join('');
         var can = !!(cur && /\S/.test(cur.text)) && state.settings.competences.length > 0;
         $('btn-tag').disabled = !can;
@@ -127,7 +154,7 @@
             state.markers.forEach(function (m, i) {
                 if ((m.c || []).indexOf(c.id) >= 0) qs.push(m.l || ('Q' + (i + 1)));
             });
-            return {label: c.code + ' – ' + c.label, questions: qs.join(', ') || '—', used: qs.length};
+            return {code: c.code, label: c.label, color: rgb(c.color), questions: qs.join(', ') || '—', used: qs.length};
         });
     }
 
@@ -142,23 +169,42 @@
 
     // ------------------------------------------------------------ compétences
 
-    function addCompetence(code, label) {
+    function addCompetence(code, label, color) {
         code = String(code || '').trim().toUpperCase();
         label = String(label || '').trim();
-        if (!label) return status('Indiquez l\'intitulé de la compétence.');
-        if (!code) code = label.slice(0, 2).toUpperCase();
-        state.settings.competences.push({id: 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), code: code, label: label});
+        if (!label) { status('Indiquez l\'intitulé de la compétence.'); return false; }
+        if (!code) code = label.replace(/^s'/i, '').slice(0, 3).toUpperCase();
+        var exists = state.settings.competences.some(function (c) { return c.code === code; });
+        if (exists) { status('La compétence ' + code + ' existe déjà.'); return false; }
+        state.settings.competences.push({id: 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+                                         code: code, label: label, color: color || nextColor()});
+        return true;
     }
 
     function onAddCompetence() {
-        addCompetence($('new-code').value, $('new-label').value);
+        if (!addCompetence($('new-code').value, $('new-label').value, $('new-color').value)) return;
         $('new-code').value = $('new-label').value = '';
         saveSettings(function () { render(); status('Compétence ajoutée.'); });
     }
 
     function onPreset() {
-        MATHS.forEach(function (c) { addCompetence(c[0], c[1]); });
-        saveSettings(function () { render(); status('Les 6 compétences de mathématiques sont ajoutées.'); });
+        var preset = PRESETS[$('preset').value], n = 0;
+        preset.list.forEach(function (c) {
+            var exists = state.settings.competences.some(function (k) { return k.code === c[0]; });
+            if (!exists && addCompetence(c[0], c[1], c[2])) n++;
+        });
+        saveSettings(function () {
+            render();
+            status(n ? n + ' compétence' + (n > 1 ? 's' : '') + ' ajoutée' + (n > 1 ? 's' : '') + ' (' + preset.name + ').'
+                     : 'Ces compétences sont déjà dans la liste.');
+        });
+    }
+
+    function onColorCompetence(id, color) {
+        var c = compById(id);
+        if (!c || c.color === color) return;
+        c.color = color;
+        saveSettings(function () { refreshAllMarkers(function () { status('Couleur de ' + c.code + ' modifiée (pensez à mettre à jour la grille).'); }); });
     }
 
     function onDeleteCompetence(id) {
@@ -302,6 +348,13 @@
             var id = e.target.getAttribute && e.target.getAttribute('data-del');
             if (id) onDeleteCompetence(id);
         };
+        $('competences').onchange = function (e) {
+            var id = e.target.getAttribute && e.target.getAttribute('data-color');
+            if (id) onColorCompetence(id, e.target.value);
+        };
+        $('preset').innerHTML = Object.keys(PRESETS).map(function (k) {
+            return '<option value="' + k + '">' + esc(PRESETS[k].name) + '</option>';
+        }).join('');
         $('analysis').onclick = function (e) {
             var i = e.target.getAttribute && e.target.getAttribute('data-find');
             if (i !== null && i !== undefined) onFind(+i);

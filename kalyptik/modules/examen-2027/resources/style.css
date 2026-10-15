@@ -33,3 +33,6 @@ input.code { width: 52px; }
 .check { display: flex; gap: 6px; align-items: center; cursor: pointer; margin: 4px 0; }
 .status { color: var(--k-muted); min-height: 1.4em; margin: 0; }
 .comp-code { font-weight: 600; min-width: 34px; display: inline-block; }
+input.swatch { width: 22px; height: 22px; padding: 0; border: 1px solid var(--k-border); border-radius: 50%; overflow: hidden; cursor: pointer; flex: none; background: none; }
+input.swatch::-webkit-color-swatch-wrapper { padding: 0; }
+input.swatch::-webkit-color-swatch { border: 0; border-radius: 50%; }

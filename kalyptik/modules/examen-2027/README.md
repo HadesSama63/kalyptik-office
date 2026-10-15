@@ -10,9 +10,9 @@ pour les énoncés des sujets d'examens en mathématiques*.
 |---|---|
 | Mise en forme 2027 | Arial 12, texte aligné à gauche (plus de justifié), interligne 1,15 ; sur tout le document (styles par défaut et « Normal » compris) ou sur la sélection. Les titres gardent leur taille, les équations ne sont pas touchées. |
 | Vérification du sujet | Analyse le document et liste les écarts : ponctuation et espaces insécables (fine avant `; ! ?`, insécable avant `:`), virgule décimale, parenthèses, guillemets « », ordinaux (1re, 2e, n-ième), unités (min, h, €, 3,55 €), séparateur des milliers, signe ×, opérateurs employés comme verbes, locutions latines en italique, souligné → gras, police, taille, interligne, justification. Les écarts cochés sont corrigés d'un clic, et le lien « Voir dans le document » sélectionne l'occurrence. |
-| Compétences évaluées | Liste propre au sujet (code + intitulé). Un bouton ajoute les 6 compétences de mathématiques (Chercher, Modéliser, Représenter, Raisonner, Calculer, Communiquer). |
-| Question à l'emplacement du curseur | Associe des compétences au paragraphe de la question. Le repère (« 1 a) ») est deviné puis modifiable. Un discret « [CH, RA] » est ajouté en fin de question : c'est un contrôle de contenu, qu'on peut masquer. |
-| Grille d'évaluation | Insère (ou remplace) en fin de document un tableau « Compétence / Questions / niveaux de maîtrise » construit à partir des questions associées. |
+| Compétences évaluées | Liste propre au sujet (couleur + code + intitulé). Listes prédéfinies : **Mathématiques – Bac pro / CAP** (APP S'approprier, ANA Analyser, REA Réaliser, VAL Valider, COM Communiquer) et **voies générale et technologique** (Chercher, Modéliser, Représenter, Raisonner, Calculer, Communiquer). Chaque compétence a sa couleur, modifiable d'un clic sur la pastille. |
+| Question à l'emplacement du curseur | Associe des compétences au paragraphe de la question. Le repère (« 1 a) ») est deviné puis modifiable. Un discret « [APP, REA] » (codes en couleur) est ajouté en fin de question : c'est un contrôle de contenu, qu'on peut masquer. |
+| Grille d'évaluation | Insère (ou remplace) en fin de document un tableau « Compétence / Questions / niveaux de maîtrise » construit à partir des questions associées ; chaque compétence y apparaît dans sa couleur. |
 
 Les compétences sont enregistrées dans le fichier lui-même (propriété
 personnalisée `KalyptikExamen2027`). Les repères des questions sont des

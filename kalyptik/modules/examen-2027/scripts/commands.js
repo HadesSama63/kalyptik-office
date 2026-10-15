@@ -64,14 +64,19 @@
         }
         sdt.SetTag('kx27q:' + Asc.scope.data);
         sdt.SetAlias('Compétences évaluées');
+        // Texte du repère en morceaux : {t: texte, c: [r, g, b] (couleur), b: gras}
         sdt.RemoveAllElements();
-        var run = Api.CreateRun();
-        run.AddText(Asc.scope.display);
-        run.SetFontSize(18);
-        run.SetColor(96, 96, 96);
-        run.SetItalic(false);
-        run.SetBold(false);
-        sdt.AddElement(run, 0);
+        var parts = Asc.scope.display || [];
+        for (var k = 0; k < parts.length; k++) {
+            var run = Api.CreateRun();
+            run.AddText(parts[k].t);
+            run.SetFontSize(18);
+            var col = parts[k].c || [96, 96, 96];
+            run.SetColor(col[0], col[1], col[2]);
+            run.SetItalic(false);
+            run.SetBold(!!parts[k].b);
+            sdt.AddElement(run, k);
+        }
         return 'ok';
     };
 
@@ -85,11 +90,17 @@
             var tag = ccs[i].GetTag ? ccs[i].GetTag() : '';
             if (!tag || tag.indexOf('kx27q:') !== 0 || !(tag.slice(6) in displays)) continue;
             ccs[i].RemoveAllElements();
-            var run = Api.CreateRun();
-            run.AddText(displays[tag.slice(6)]);
-            run.SetFontSize(18);
-            run.SetColor(96, 96, 96);
-            ccs[i].AddElement(run, 0);
+            var parts = displays[tag.slice(6)] || [];
+            for (var k = 0; k < parts.length; k++) {
+                var run = Api.CreateRun();
+                run.AddText(parts[k].t);
+                run.SetFontSize(18);
+                var col = parts[k].c || [96, 96, 96];
+                run.SetColor(col[0], col[1], col[2]);
+                run.SetItalic(false);
+                run.SetBold(!!parts[k].b);
+                ccs[i].AddElement(run, k);
+            }
             n++;
         }
         return n;
@@ -134,7 +145,16 @@
         var header = ['Compétence', 'Questions'].concat(g.levels);
         for (var c = 0; c < header.length; c++) put(0, c, header[c], true);
         for (var r = 0; r < g.rows.length; r++) {
-            put(r + 1, 0, g.rows[r].label, false);
+            // Compétence : code en gras dans sa couleur, cellule teintée de la même couleur
+            var row = g.rows[r], col = row.color || [96, 96, 96];
+            var cell = table.GetCell(r + 1, 0);
+            var cp = cell.GetContent().GetElement(0);
+            var code = cp.AddText(row.code);
+            code.SetBold(true);
+            code.SetColor(col[0], col[1], col[2]);
+            cp.AddText(' – ' + row.label);
+            var tint = function (v) { return Math.round(v + (255 - v) * 0.85); };
+            cell.SetShd('clear', tint(col[0]), tint(col[1]), tint(col[2]), false);
             put(r + 1, 1, g.rows[r].questions, false);
             for (var l = 0; l < g.levels.length; l++) put(r + 1, 2 + l, '', false);
         }

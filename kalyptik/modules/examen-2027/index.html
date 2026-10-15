@@ -41,11 +41,15 @@
         <h2>Compétences évaluées</h2>
         <div id="competences" class="list"></div>
         <div class="row">
+            <input id="new-color" type="color" class="swatch" title="Couleur" value="#1F6FB2">
             <input id="new-code" class="code" placeholder="Code" maxlength="6">
             <input id="new-label" class="grow" placeholder="Intitulé de la compétence">
             <button id="btn-add-comp" class="btn">Ajouter</button>
         </div>
-        <button id="btn-preset" class="link">Ajouter les 6 compétences de mathématiques</button>
+        <div class="row">
+            <select id="preset" class="grow" title="Compétences prédéfinies"></select>
+            <button id="btn-preset" class="btn">Ajouter</button>
+        </div>
     </section>
 
     <section class="card">

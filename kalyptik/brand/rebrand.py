@@ -75,6 +75,12 @@ RULES = [
     ("build/windows/build.ps1", '$VersionFull = "$ProductVersion.0"',
      '$VersionFull = "$ProductVersion.$(if ($BuildNumber -match \'^\\d+$\') { $BuildNumber } else { 0 })"'),
 
+    # --- Polices manquantes à l'ouverture d'un document (kalyptik/fonts/kalyptik-fonts.js)
+    ("web-apps/apps/documenteditor/main/index.html.deploy",
+     '<script src="@@SRC_ROOT@@/apps/common/main/lib/util/docserviceworker.js?__inline=true"></script>',
+     '<script src="@@SRC_ROOT@@/apps/common/main/lib/util/docserviceworker.js?__inline=true"></script>\n'
+     '    <script src="@@SRC_ROOT@@/apps/common/main/lib/util/kalyptik-fonts.js?__inline=true"></script>'),
+
     # --- Propriétés de l'exécutable Windows
     (VERSION, '#define VER_FILEDESCRIPTION_STR     "Euro-Office Desktop Editors\\0"',
               f'#define VER_FILEDESCRIPTION_STR     "{SUITE}\\0"'),
@@ -139,8 +145,10 @@ def main():
     errors, applied = [], 0
     for rel, old, new in RULES:
         text = read(rel)
-        if "\r\n" in text and "\n" in old:  # fichier en fins de ligne Windows
+        if "\r\n" in text:  # fichier en fins de ligne Windows
             old, new = old.replace("\n", "\r\n"), new.replace("\n", "\r\n")
+        if old in new and new in text:  # règle qui ajoute du texte, déjà appliquée
+            continue
         if old in text:
             if text.count(old) != 1:
                 errors.append(f"{rel}: « {old.splitlines()[0]} » trouvé {text.count(old)} fois (1 attendu)")

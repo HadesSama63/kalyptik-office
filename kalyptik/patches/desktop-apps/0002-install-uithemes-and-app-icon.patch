@@ -1,8 +1,8 @@
 diff --git a/win-linux/CMakeLists.txt b/win-linux/CMakeLists.txt
-index b256bac..a40dc77 100644
+index b256bac..c170a14 100644
 --- a/win-linux/CMakeLists.txt
 +++ b/win-linux/CMakeLists.txt
-@@ -521,6 +521,24 @@ install(DIRECTORY "${EO_CORE_OUTPUT_DIR}/"
+@@ -521,6 +521,31 @@ install(DIRECTORY "${EO_CORE_OUTPUT_DIR}/"
      DESTINATION ${CMAKE_INSTALL_BINDIR}/converter
  )
  
@@ -17,6 +17,13 @@ index b256bac..a40dc77 100644
 +# Kalyptik: app.ico, used by the Windows shortcuts, the uninstaller entry and
 +# notifications ({app}\app.ico in package/inno/common.iss), was never installed:
 +# the shortcuts showed a blank page instead of the application icon.
++# Kalyptik: bundled free fonts (dyslexia, school) → fonts/, scanned at startup
++if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/res/kalyptik-fonts")
++    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/res/kalyptik-fonts/"
++        DESTINATION ${CMAKE_INSTALL_BINDIR}/fonts
++    )
++endif()
++
 +if(WIN32)
 +    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/icons/desktopeditors-eo.ico"
 +        DESTINATION ${CMAKE_INSTALL_BINDIR}

@@ -13,6 +13,7 @@
 #   5. traductions françaises    kalyptik/i18n/complete_fr.py
 #   6. mises à jour              kalyptik/update/kalyptik-update.js
 #   7. rubans et typographie     kalyptik/theme/ribbon/
+#   8. polices                   kalyptik/fonts/
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 PYTHON=$(command -v python3 || command -v python)
@@ -52,5 +53,15 @@ echo "   kalyptik-update.js copié"
 
 echo "== 7. Rubans et typographie Kalyptik"
 "$PYTHON" kalyptik/theme/ribbon/install.py
+
+echo "== 8. Polices (libres incluses + vérification à l'ouverture)"
+mkdir -p desktop-apps/win-linux/res/kalyptik-fonts
+for dir in kalyptik/fonts/bundled/*/; do
+  family=$(basename "$dir")
+  cp "$dir"*.[ot]tf desktop-apps/win-linux/res/kalyptik-fonts/
+  cp "$dir"OFL.txt "desktop-apps/win-linux/res/kalyptik-fonts/LICENCE-$family.txt"
+done
+cp kalyptik/fonts/kalyptik-fonts.js web-apps/apps/common/main/lib/util/
+echo "   $(ls desktop-apps/win-linux/res/kalyptik-fonts/*.[ot]tf | wc -l) fichiers de police copiés"
 
 echo "Kalyptik Office appliqué."

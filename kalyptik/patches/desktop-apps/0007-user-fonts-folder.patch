@@ -1,0 +1,27 @@
+diff --git a/win-linux/src/main.cpp b/win-linux/src/main.cpp
+index 271f9e0..57ab626 100644
+--- a/win-linux/src/main.cpp
++++ b/win-linux/src/main.cpp
+@@ -40,6 +40,8 @@
+ #include "chelp.h"
+ #include "common/File.h"
+ #include <QStyleFactory>
++#include <QDir>
++#include <QFileInfo>
+ 
+ 
+ int main( int argc, char *argv[] )
+@@ -106,6 +108,13 @@ int main( int argc, char *argv[] )
+         manager->m_oSettings.local_editors_path         = app_path + L"/editors/web-apps/apps/api/documents/index.html";
+         manager->m_oSettings.system_templates_path      = app_path  + L"/converter/templates";
+         manager->m_oSettings.additional_fonts_folder.push_back(app_path + L"/fonts");
++        // Kalyptik: per-user fonts downloaded by the editors (missing fonts of a
++        // document), next to the recover folder: <data>/kalyptik-fonts
++        {
++            QString user_fonts = QFileInfo(QString::fromStdWString(manager->m_oSettings.recover_path)).absolutePath() + "/kalyptik-fonts";
++            QDir().mkpath(user_fonts);
++            manager->m_oSettings.additional_fonts_folder.push_back(user_fonts.toStdWString());
++        }
+         manager->m_oSettings.country = Utils::systemLocationCode().toStdString();
+         manager->m_oSettings.connection_error_path      = app_path + L"/editors/webext/noconnect.html";
+     };

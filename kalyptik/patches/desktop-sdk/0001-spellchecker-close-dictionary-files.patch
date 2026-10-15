@@ -1,0 +1,14 @@
+diff --git a/ChromiumBasedEditors/lib/src/spellchecker.cpp b/ChromiumBasedEditors/lib/src/spellchecker.cpp
+index ea3241a..4848963 100644
+--- a/ChromiumBasedEditors/lib/src/spellchecker.cpp
++++ b/ChromiumBasedEditors/lib/src/spellchecker.cpp
+@@ -689,8 +689,8 @@ public:
+ 			oFile1.CloseFile();
+ 
+ 			NSFile::CFileBinary oFile2;
+-			oFile2.OpenFile(ws2);
+ 			bool b2 = oFile2.OpenFile(ws2);
++			oFile2.CloseFile();
+ 
+ 			if (b1 && b2)
+ 			{

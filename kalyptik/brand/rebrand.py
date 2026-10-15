@@ -28,6 +28,7 @@ DEFINES = "desktop-apps/win-linux/src/defines.h"
 VERSION = "desktop-apps/win-linux/src/version.h"
 INNO = "desktop-apps/package/inno/defines.iss"
 INNO_COMMON = "desktop-apps/package/inno/common.iss"
+INNO_CODE = "desktop-apps/package/inno/_code.iss"
 LINUX_M4 = "desktop-apps/package/common/linux/defines.m4"
 START = "desktop-apps/common/loginpage/src/panelrecent.js"
 START_FR = "desktop-apps/common/loginpage/locale/fr.js"
@@ -58,6 +59,58 @@ RULES = [
                   "[Languages]\nName: fr; MessagesFile: compiler:Languages\\French.isl;\n#ifdef _EuroOffice"),
     (INNO_COMMON, "Name: de; MessagesFile: compiler:Languages\\German.isl;\nName: fr; MessagesFile: compiler:Languages\\French.isl;\n",
                   "Name: de; MessagesFile: compiler:Languages\\German.isl;\n"),
+    # Fichiers verrouillés (erreur 32) : Inno repère aussi qui bloque les dictionnaires…
+    (INNO_COMMON, "SetupMutex                =ASC",
+                  "SetupMutex                =ASC\n"
+                  "CloseApplicationsFilter   =*.exe,*.dll,*.chm,*.dic,*.aff"),
+    # … et ferme, après confirmation, les processus encore lancés depuis le dossier
+    # de l'application (editors.exe, editors_helper.exe…), avant de copier les fichiers.
+    (INNO_CODE, "function PrepareToInstall(var NeedsRestart: Boolean): String;",
+     "function KalyptikCloseRunning(): String;\n"
+     "var\n"
+     "  Locator, Service, Procs, Proc: Variant;\n"
+     "  AppDir, ExePath: String;\n"
+     "  I, Found: Integer;\n"
+     "begin\n"
+     "  Result := '';\n"
+     "  AppDir := Lowercase(AddBackslash(ExpandConstant('{app}')));\n"
+     "  try\n"
+     "    Locator := CreateOleObject('WbemScripting.SWbemLocator');\n"
+     "    Service := Locator.ConnectServer('.', 'root\\CIMV2');\n"
+     "    Procs := Service.ExecQuery('SELECT ProcessId, ExecutablePath FROM Win32_Process WHERE ExecutablePath IS NOT NULL');\n"
+     "    Found := 0;\n"
+     "    for I := 0 to Procs.Count - 1 do begin\n"
+     "      Proc := Procs.ItemIndex(I);\n"
+     "      ExePath := Lowercase(Proc.ExecutablePath);\n"
+     "      if Pos(AppDir, ExePath) = 1 then Found := Found + 1;\n"
+     "    end;\n"
+     "    if Found = 0 then exit;\n"
+     "    if not WizardSilent() then\n"
+     "      if IDOK <> MsgBox(ExpandConstant('{cm:UpdateAppRunning,{#sAppName}}'), mbInformation, MB_OKCANCEL) then begin\n"
+     "        Result := FmtMessage(SetupMessage(msgSetupAppRunningError), ['{#sAppName}']);\n"
+     "        exit;\n"
+     "      end;\n"
+     "    for I := 0 to Procs.Count - 1 do begin\n"
+     "      Proc := Procs.ItemIndex(I);\n"
+     "      ExePath := Lowercase(Proc.ExecutablePath);\n"
+     "      if Pos(AppDir, ExePath) = 1 then\n"
+     "        try\n"
+     "          Proc.Terminate();\n"
+     "        except\n"
+     "          Log('Kalyptik : impossible de fermer ' + ExePath);\n"
+     "        end;\n"
+     "    end;\n"
+     "    Sleep(1500);\n"
+     "  except\n"
+     "    Log('Kalyptik : liste des processus indisponible');\n"
+     "  end;\n"
+     "end;\n"
+     "\n"
+     "function PrepareToInstall(var NeedsRestart: Boolean): String;"),
+    (INNO_CODE, "  path := ExpandConstant('{app}\\editors\\web-apps');\n  if DirExists(path) then DelTree(path, true, true, true);",
+     "  Result := KalyptikCloseRunning();\n  if Result <> '' then exit;\n\n"
+     "  path := ExpandConstant('{app}\\editors\\web-apps');\n  if DirExists(path) then DelTree(path, true, true, true);"),
+
     (INNO_COMMON, "Compression=lzma2/ultra64\nLZMAUseSeparateProcess=yes",
                   "Compression=lzma2/ultra64\nLanguageDetectionMethod=none\nLZMAUseSeparateProcess=yes"),
 

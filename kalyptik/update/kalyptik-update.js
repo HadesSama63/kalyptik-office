@@ -4,7 +4,8 @@
  * Au démarrage (puis toutes les 12 h), compare la version installée à la
  * dernière version publiée sur GitHub (Releases du dépôt Kalyptik Office) et
  * affiche une carte « Nouvelle version disponible » avec le lien de
- * téléchargement du bon paquet (installeur Windows, .deb, .rpm).
+ * téléchargement du bon paquet (installeur Windows, .deb, .rpm ; sous macOS,
+ * seulement si la version contient un .dmg).
  * Voir kalyptik/update/README.md.
  */
 +function () { 'use strict';
@@ -12,6 +13,7 @@
     const API = `https://api.github.com/repos/${REPO}/releases/latest`;
     const INTERVAL = 12 * 3600 * 1000;
     const DISMISSED = 'kalyptik-update-dismissed';
+    const isMac = /mac/i.test(navigator.platform);
 
     const numbers = v => (String(v).match(/\d+/g) || []).map(Number);
     const isNewer = (a, b) => {
@@ -31,7 +33,8 @@
     function pickAsset(assets, app) {
         const pkg = (app.pkg || '').toLowerCase();
         const ext = pkg == 'deb' ? '.deb' : pkg == 'rpm' ? '.rpm' :
-                    (pkg == 'exe' || /win/i.test(navigator.platform)) ? '.exe' : null;
+                    (pkg == 'exe' || /win/i.test(navigator.platform)) ? '.exe' :
+                    isMac ? '.dmg' : null;
         const candidates = (assets || []).filter(a => a.name.toLowerCase().endsWith(ext || '\0') && !/redist/i.test(a.name));
         return candidates.find(a => /kalyptik/i.test(a.name)) || candidates[0];
     }
@@ -143,6 +146,9 @@
                 const latest = rel.tag_name.replace(/^v/i, '');
                 if ( !isNewer(latest, app.version) || storage.get(DISMISSED) == latest ) return;
                 const asset = pickAsset(rel.assets, app);
+                // macOS : la version Mac (payante) n'est pas publiée ici ; on ne
+                // signale que les versions qui contiennent une image .dmg.
+                if ( isMac && !asset ) return;
                 show(latest, asset, rel.html_url);
             })
             .catch(() => {});   // hors ligne : on réessaiera plus tard

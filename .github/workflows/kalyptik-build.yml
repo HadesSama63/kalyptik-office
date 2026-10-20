@@ -18,6 +18,10 @@ on:
         description: "Windows x64 (installeur .exe, .zip)"
         type: boolean
         default: false
+      macos:
+        description: "macOS Apple Silicon (application non signée, non publiée : à signer sur le Mac)"
+        type: boolean
+        default: false
       publier:
         description: "Publier la version : les utilisateurs sont prévenus dans l'application"
         type: boolean
@@ -339,6 +343,124 @@ jobs:
           path: |
             desktop-apps/package/zip/*.zip
             desktop-apps/package/inno/*.exe
+
+  # macOS (Apple Silicon) : l'application est compilée ici, NON signée, et
+  # n'est pas publiée (version payante). On la télécharge (artefact
+  # « kalyptik-office-macos-arm64 ») puis on la signe, la fait notariser par
+  # Apple et on crée le .dmg sur le Mac : kalyptik/scripts/macos-sign.sh.
+  # Mêmes étapes que le build macOS d'Euro-Office (build/macos/README.md).
+  build-macos:
+    if: inputs.macos
+    needs: build-common
+    runs-on: macos-14
+    timeout-minutes: 360
+    env:
+      EO_3RDPARTY: /Users/runner/eo-3rdparty
+      STAGE: ${{ github.workspace }}/macos-stage
+      SDK_BUILD_DIR: ${{ github.workspace }}/build-mac-sdk
+      CCACHE_DIR: /Users/runner/.ccache
+      APP_NAME: Kalyptik Office
+      BUNDLE_ID: com.kalyptik.office
+    steps:
+      - name: Espace disque disponible
+        run: df -h / ; sysctl -n hw.ncpu hw.memsize
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Appliquer Kalyptik Office
+        run: ./kalyptik/scripts/apply-kalyptik.sh
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: common-files
+          path: .
+
+      # Les polices libres incluses (école, dyslexie) rejoignent les polices de
+      # l'application : elles sont intégrées à la liste des polices au « stage ».
+      - name: Extraire les éditeurs web et ajouter les polices Kalyptik
+        run: |
+          mkdir -p build/deploy/common
+          tar -xf common.tar -C build/deploy/common
+          cp desktop-apps/win-linux/res/kalyptik-fonts/*.[ot]tf build/deploy/common/fonts/
+          cp desktop-apps/win-linux/res/kalyptik-fonts/LICENCE-*.txt build/deploy/common/fonts/
+
+      - name: Outils de compilation (Homebrew)
+        run: brew install ninja autoconf automake libtool pkg-config ccache
+
+      - uses: lukka/run-vcpkg@v11
+
+      # Comme sous Windows : seules les dépendances terminées (install/) sont
+      # gardées en cache ; une dépendance déjà compilée n'est pas refaite.
+      - name: Restaurer les dépendances C++
+        id: tp-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.EO_3RDPARTY }}/install
+          key: mac-arm64-3rdparty-${{ hashFiles('core/Common/3dParty/**/*.py', 'core/Common/3dParty/**/*.patch') }}-${{ github.run_id }}
+          restore-keys: mac-arm64-3rdparty-${{ hashFiles('core/Common/3dParty/**/*.py', 'core/Common/3dParty/**/*.patch') }}-
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: mac-arm64-ccache-${{ hashFiles('core/**/CMakeLists.txt', 'desktop-sdk/**/CMakeLists.txt') }}
+          restore-keys: mac-arm64-ccache-
+
+      - name: Compiler le cœur (desktop-sdk)
+        run: |
+          cmake -S "$GITHUB_WORKSPACE/desktop-sdk/ChromiumBasedEditors/lib" -B "$SDK_BUILD_DIR" \
+            -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_DESKTOP=1 \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" \
+            -DVCPKG_TARGET_TRIPLET=arm64-osx \
+            -DVCPKG_MANIFEST_MODE=ON \
+            -DVCPKG_MANIFEST_DIR="$GITHUB_WORKSPACE/core" \
+            -DEO_CORE_3RD_PARTY_DIR="$EO_3RDPARTY" \
+            -DEO_CORE_OUTPUT_DIR="$STAGE/converter"
+          cmake --build "$SDK_BUILD_DIR"
+
+      - name: Assembler (éditeurs, polices, thèmes)
+        run: ./build/macos/stage.sh --stage-dir "$STAGE" --3rdparty-dir "$EO_3RDPARTY"
+
+      - name: Icônes et nom Kalyptik Office
+        run: |
+          icon=desktop-apps/win-linux/res/icons/app-icon-eo.svg
+          ./desktop-apps/macos/regenerate-branding-assets.sh \
+            --app-icon-svg "$icon" --tab-icon-light-svg "$icon" --tab-icon-dark-svg "$icon"
+          ./desktop-apps/macos/apply-branding.sh \
+            --company-name "$APP_NAME" --product-name "$APP_NAME" --version "$PRODUCT_VERSION"
+
+      - name: Compiler l'application (Xcode)
+        run: |
+          xcodebuild -project desktop-apps/macos/Euro-Office.xcodeproj \
+            -scheme Euro-Office-arm -configuration Release \
+            EO_MAC_STAGE_DIR="$STAGE" \
+            CONFIGURATION_BUILD_DIR="$GITHUB_WORKSPACE/build/macos/out" \
+            PRODUCT_NAME="$APP_NAME" \
+            PRODUCT_BUNDLE_IDENTIFIER="$BUNDLE_ID" \
+            build
+
+      # ditto garde les liens symboliques et attributs des frameworks (zip non).
+      - name: Empaqueter l'application (non signée)
+        run: |
+          zip="Kalyptik-Office-$PRODUCT_VERSION.${{ github.run_number }}-macos-arm64-non-signe.zip"
+          ditto -c -k --sequesterRsrc --keepParent "build/macos/out/$APP_NAME.app" "$zip"
+          ls -lh "$zip"
+
+      - name: Enregistrer les dépendances C++
+        if: always() && steps.tp-cache.outcome == 'success'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.EO_3RDPARTY }}/install
+          key: ${{ steps.tp-cache.outputs.cache-primary-key }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kalyptik-office-macos-arm64
+          path: Kalyptik-Office-*-macos-arm64-non-signe.zip
+          compression-level: 0
+          retention-days: 7
 
   # Publie une version sur GitHub (onglet Releases). L'application installée
   # la détecte au démarrage et propose de la télécharger (kalyptik/update).

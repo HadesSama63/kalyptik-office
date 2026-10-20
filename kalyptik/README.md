@@ -58,6 +58,9 @@ scripts (`core/Common/3dParty`).
 Pour distribuer une mise à jour aux utilisateurs, cocher aussi **« Publier la
 version »** : voir [update/README.md](update/README.md).
 
+La version macOS (cocher **macOS**) n'est jamais publiée : elle se signe et
+se notarise sur le Mac, voir [macos/README.md](macos/README.md).
+
 Les textes restés en anglais dans une nouvelle version d'Euro-Office sont
 listés au build (étape « Traductions françaises manquantes ») : ajoutez leur
 traduction dans `kalyptik/i18n/fr.json`.

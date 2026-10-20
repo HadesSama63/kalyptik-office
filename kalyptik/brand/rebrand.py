@@ -16,6 +16,7 @@ Ce qui ne change PAS, volontairement :
 - le protocole « oo-office:// » utilisé par les connecteurs cloud (Nextcloud…).
 Le site affiché (fenêtre « À propos », installeur Windows) est SITE.
 """
+import re
 import sys
 from pathlib import Path
 
@@ -192,7 +193,54 @@ RULES = [
 ]
 
 # Libellé des modèles de formulaire (.docxf) dans l'installeur Windows, toutes langues
+# --- Application macOS : lien « Licence » de la fenêtre « À propos » (sources AGPL)
+RULES.append(("desktop-apps/macos/Euro-Office/Code/Controllers/About/ASCAboutController.m",
+              '[NSURL URLWithString:@"https://github.com/Euro-Office/DesktopEditors/blob/main/LICENSE"]',
+              '[NSURL URLWithString:@"https://github.com/HadesSama63/kalyptik-office/blob/HEAD/LICENSE"]'))
+
 BULK = [("desktop-apps/package/inno/_messages.iss", "Euro-Office", "KalyptForm")]
+
+
+# --- Application macOS : nom dans les menus (« À propos de… », « Masquer… »,
+# « Terminer… ») et dans les messages traduits. Dans Localizable.strings, la clé
+# (texte anglais cherché par le code) ne change pas : seule la traduction change.
+MAC_DIR = "desktop-apps/macos/Euro-Office"
+MAC_NAMES = ("ONLYOFFICE", "Euro-Office")
+STRINGS_LINE = re.compile(r'^(\s*"(?:[^"\\]|\\.)*"\s*=\s*")((?:[^"\\]|\\.)*)("\s*;)', re.M)
+
+
+def read_any(path):
+    data = path.read_bytes()
+    enc = "utf-16" if data[:2] in (b"\xff\xfe", b"\xfe\xff") else "utf-8"
+    return data.decode(enc), enc
+
+
+def rename(text):
+    for name in MAC_NAMES:
+        text = text.replace(name, SUITE)
+    return text
+
+
+def brand_macos(check):
+    base = ROOT / MAC_DIR
+    if not base.is_dir():
+        return 0
+    changed = 0
+    files = sorted(base.glob("*.lproj/Main.strings")) + sorted(base.glob("*.lproj/Localizable.strings")) \
+        + [base / "Base.lproj/Main.storyboard"]
+    for path in files:
+        if not path.is_file():
+            continue
+        text, enc = read_any(path)
+        if path.name == "Localizable.strings":
+            new = STRINGS_LINE.sub(lambda m: m.group(1) + rename(m.group(2)) + m.group(3), text)
+        else:
+            new = rename(text)
+        if new != text:
+            changed += 1
+            if not check:
+                path.write_bytes(new.encode(enc))
+    return changed
 
 
 def read(rel):
@@ -227,6 +275,9 @@ def main():
             applied += 1
             if not check:
                 write(rel, text.replace(old, new))
+    mac = brand_macos(check)
+    if mac:
+        print(f"macOS : nom Kalyptik Office dans {mac} fichier(s) de textes")
     for e in errors:
         print("ERREUR", e, file=sys.stderr)
     print(f"{applied} règle(s) {'applicable(s)' if check else 'appliquée(s)'}, {len(errors)} erreur(s)")

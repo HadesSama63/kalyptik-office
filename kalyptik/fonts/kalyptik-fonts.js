@@ -94,12 +94,13 @@
 
     // Télécharge dans <données utilisateur>/kalyptik-fonts (créé par l'application).
     // Le dossier est déduit du chemin d'un premier fichier temporaire (dossier
-    // de récupération du document : <données>/recover/<document>/...).
+    // de récupération du document : <données>/recover/<document>/... sous
+    // Windows et Linux, <données>/recovery/... sous macOS).
     function download(urls, done) {
         const ade = window.AscDesktopEditor;
         ade.DownloadFiles([urls[0]], [], files => {
             const tmp = String(Object.values(files || {})[0] || '').replace(/\\/g, '/');
-            const m = tmp.match(/^(.*)\/recover\//i);
+            const m = tmp.match(/^(.*)\/recovery?\//i);
             ade.RemoveFile && tmp && ade.RemoveFile(tmp);
             if ( !m ) return done(false);
             const dir = m[1] + '/kalyptik-fonts/';

@@ -1,0 +1,16 @@
+diff --git a/macos/Euro-Office/main.mm b/macos/Euro-Office/main.mm
+index 881ab550a..3631bfcb3 100644
+--- a/macos/Euro-Office/main.mm
++++ b/macos/Euro-Office/main.mm
+@@ -82,6 +82,11 @@ int main(int argc, const char * argv[]) {
+     // setup editor fonts directory
+     std::vector<std::wstring> fontsDirectories;
+     fontsDirectories.push_back([[resourcePath stringByAppendingPathComponent:@"login/fonts"] stdwstring]);
++    // Kalyptik: per-user fonts downloaded by the editors (missing fonts of a
++    // document), in the application data folder: <data>/kalyptik-fonts
++    NSString * userFonts = [[ASCHelper applicationDataPath] stringByAppendingPathComponent:@"kalyptik-fonts"];
++    [[NSFileManager defaultManager] createDirectoryAtPath:userFonts withIntermediateDirectories:YES attributes:nil error:nil];
++    fontsDirectories.push_back([userFonts stdwstring]);
+     appManager->m_oSettings.additional_fonts_folder = fontsDirectories;
+     
+     NSString * error_page = [resourcePath stringByAppendingPathComponent:@"login/noconnect.html"];

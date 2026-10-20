@@ -63,6 +63,13 @@ case "$INPUT" in
     *.app) ditto "$INPUT" "$WORK/$(basename "$INPUT")" ;;
     *) die "format non reconnu (attendu : .zip ou .app) : $INPUT" ;;
 esac
+# Artefact GitHub téléchargé tel quel : un .zip qui contient notre .zip
+inner=$(find "$WORK" -maxdepth 1 -name "*.zip" -type f | head -1)
+if [ -n "$inner" ] && ! find "$WORK" -maxdepth 1 -name "*.app" -type d | grep -q .; then
+    ditto -x -k "$inner" "$WORK"
+    INPUT="$inner"
+    rm -f "$inner"
+fi
 APP=$(find "$WORK" -maxdepth 1 -name "*.app" -type d | head -1)
 [ -n "$APP" ] || die "aucune application .app dans $INPUT"
 NAME=$(basename "$APP" .app)

@@ -146,8 +146,8 @@
                 const latest = rel.tag_name.replace(/^v/i, '');
                 if ( !isNewer(latest, app.version) || storage.get(DISMISSED) == latest ) return;
                 const asset = pickAsset(rel.assets, app);
-                // macOS : la version Mac (payante) n'est pas publiée ici ; on ne
-                // signale que les versions qui contiennent une image .dmg.
+                // macOS : le .dmg (signé sur le Mac) est ajouté à la main après la
+                // publication ; on ne signale que les versions qui en contiennent un.
                 if ( isMac && !asset ) return;
                 show(latest, asset, rel.html_url);
             })

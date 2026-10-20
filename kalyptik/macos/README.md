@@ -6,8 +6,11 @@ La version Mac (Apple Silicon) se prépare en deux temps :
    Elle sort **non signée** et n'est **pas publiée** : elle reste dans les
    artefacts du build pendant 7 jours.
 2. **Votre MacBook la signe**, la fait **notariser par Apple** et crée le
-   **.dmg** à vendre, avec `kalyptik/scripts/macos-sign.sh`. Ces étapes sont
-   légères (quelques minutes, surtout l'attente d'Apple).
+   **.dmg**, avec `kalyptik/scripts/macos-sign.sh`. Ces étapes sont légères
+   (quelques minutes, surtout l'attente d'Apple).
+3. **Vous ajoutez le .dmg à la version publiée sur GitHub** : il est alors
+   proposé sur kalyptik.com (bloc `kalyptik/site/telechargement.html`) et les
+   utilisateurs Mac sont prévenus dans l'application.
 
 ## Préparation du MacBook (une seule fois)
 
@@ -58,6 +61,11 @@ La version Mac (Apple Silicon) se prépare en deux temps :
 4. **Tester** le .dmg : l'ouvrir, glisser Kalyptik Office dans Applications,
    lancer l'application, ouvrir un document de chaque type.
 
+5. **Publier** : GitHub → *Releases* → la version correspondante (par exemple
+   v9.3.5.28) → icône crayon (*Edit*) → glisser le .dmg dans la zone
+   *Attach binaries* → *Update release*. Ne publiez que le .dmg produit par le
+   script (signé et notarisé), jamais l'application non signée.
+
 En cas de refus d'Apple, le script affiche le détail et l'enregistre dans
 `kalyptik-macos/notarisation-details.json`.
 
@@ -67,24 +75,14 @@ Les mêmes ajouts que sous Windows et Linux (module Examen 2027, polices pour
 l'école et la dyslexie, vérification des polices à l'ouverture, graphiques,
 thèmes Kalyptik), avec le nom et l'icône Kalyptik Office. Différences :
 
-- pas de mise à jour intégrée : la notification de nouvelle version n'apparaît
-  sur Mac que pour une version publiée sur GitHub avec un .dmg ; pour la version
-  payante, prévenez vos clients par votre plateforme de vente ;
+- pas d'installation intégrée des mises à jour : la notification de nouvelle
+  version apparaît sur Mac quand une version publiée contient un .dmg, et
+  propose de le télécharger ;
 - la langue suit celle de macOS (français sur un Mac en français).
 
-## Vendre la version Mac : à savoir
+## Licence
 
-- **Licence AGPL v3** (celle d'Euro-Office) : la vente est autorisée, mais vos
-  acheteurs doivent pouvoir obtenir le code source (le dépôt public suffit ; le
-  lien « Licence » de la fenêtre « À propos » y renvoie) et ils restent libres
-  de redistribuer l'application. Ce que vous vendez, c'est la version prête à
-  l'emploi, signée et notarisée, et votre suivi. Les mentions d'origine
-  (Euro-Office, ONLYOFFICE) doivent rester.
-- **Pas de Mac App Store** : ses conditions sont incompatibles avec l'AGPL ;
-  vendez le .dmg directement.
-- **Plateforme de vente** : une plateforme qui agit comme revendeur
-  (*merchant of record*, par exemple Paddle ou Lemon Squeezy) encaisse, gère la
-  TVA européenne et les factures, et vous reverse le montant net.
-- **Statut** : vérifiez auprès de votre administration les règles de cumul
-  d'activités des fonctionnaires, et le statut à utiliser pour les ventes
-  (micro-entreprise, par exemple).
+Kalyptik Office est sous licence AGPL v3 (celle d'Euro-Office) : le code source
+est sur ce dépôt (le lien « Licence » de la fenêtre « À propos » y renvoie) et
+les mentions d'origine (Euro-Office, ONLYOFFICE) doivent rester. Le Mac App
+Store n'est pas une option : ses conditions sont incompatibles avec l'AGPL.

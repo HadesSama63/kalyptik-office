@@ -1,0 +1,110 @@
+<!--
+  Kalyptik Office : bloc « Télécharger » pour kalyptik.com.
+  À coller tel quel dans une page du site (bloc HTML personnalisé).
+  Les liens pointent toujours vers la dernière version publiée sur GitHub
+  (https://github.com/HadesSama63/kalyptik-office/releases) : rien à modifier
+  à chaque nouvelle version. Le bouton du système du visiteur est mis en avant.
+-->
+<section id="kx-dl" aria-labelledby="kx-dl-titre">
+  <style>
+    #kx-dl { --kx-accent: #1D748F; --kx-texte: #1f2933; --kx-doux: #5f6b76; --kx-bord: #d9e2ec;
+             --kx-fond: #ffffff; --kx-fond-carte: #f7fafc;
+             font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+             color: var(--kx-texte); background: var(--kx-fond); max-width: 960px; margin: 0 auto; padding: 24px 16px; box-sizing: border-box; }
+    #kx-dl *, #kx-dl *::before, #kx-dl *::after { box-sizing: inherit; }
+    #kx-dl h2 { font-size: 1.6rem; margin: 0 0 6px; }
+    #kx-dl .kx-intro { color: var(--kx-doux); margin: 0 0 20px; }
+    #kx-dl .kx-grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    #kx-dl .kx-carte { border: 1px solid var(--kx-bord); border-radius: 14px; padding: 20px; background: var(--kx-fond-carte);
+                       display: flex; flex-direction: column; gap: 10px; }
+    #kx-dl .kx-carte.kx-conseille { border-color: var(--kx-accent); box-shadow: 0 0 0 2px var(--kx-accent) inset; }
+    #kx-dl .kx-carte h3 { margin: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
+    #kx-dl .kx-badge { font-size: .72rem; font-weight: 600; color: #fff; background: var(--kx-accent); border-radius: 999px; padding: 2px 8px; white-space: nowrap; display: none; }
+    #kx-dl .kx-conseille .kx-badge { display: inline-block; }
+    #kx-dl .kx-config { color: var(--kx-doux); font-size: .9rem; margin: 0; flex: 1; }
+    #kx-dl .kx-bouton { display: block; text-align: center; text-decoration: none; font-weight: 600; border-radius: 10px;
+                        padding: 11px 14px; background: var(--kx-accent); color: #fff; }
+    #kx-dl .kx-bouton:hover, #kx-dl .kx-bouton:focus-visible { filter: brightness(1.1); }
+    #kx-dl .kx-bouton.kx-second { background: transparent; color: var(--kx-accent); border: 1px solid var(--kx-accent); }
+    #kx-dl .kx-detail { font-size: .8rem; color: var(--kx-doux); margin: 0; min-height: 1em; }
+    #kx-dl .kx-pied { margin-top: 18px; font-size: .9rem; color: var(--kx-doux); }
+    #kx-dl .kx-pied a { color: var(--kx-accent); }
+  </style>
+
+  <h2 id="kx-dl-titre">Télécharger Kalyptik Office</h2>
+  <p class="kx-intro">Gratuit et libre. <span data-kx="version">Dernière version</span></p>
+
+  <div class="kx-grille">
+    <div class="kx-carte" data-kx-os="windows">
+      <h3>Windows <span class="kx-badge">Recommandé</span></h3>
+      <p class="kx-config">Windows 10 ou 11, 64 bits.</p>
+      <a class="kx-bouton" data-kx-lien="windows" href="https://github.com/HadesSama63/kalyptik-office/releases/latest">Télécharger pour Windows</a>
+      <p class="kx-detail" data-kx-detail="windows"></p>
+    </div>
+
+    <div class="kx-carte" data-kx-os="mac">
+      <h3>macOS <span class="kx-badge">Recommandé</span></h3>
+      <p class="kx-config">Mac avec puce Apple (M1 ou plus récent). Ouvrez le fichier puis glissez Kalyptik Office dans Applications.</p>
+      <a class="kx-bouton" data-kx-lien="mac" href="https://github.com/HadesSama63/kalyptik-office/releases/latest">Télécharger pour Mac</a>
+      <p class="kx-detail" data-kx-detail="mac"></p>
+    </div>
+
+    <div class="kx-carte" data-kx-os="linux">
+      <h3>Linux <span class="kx-badge">Recommandé</span></h3>
+      <p class="kx-config">64 bits. Debian, Ubuntu, Linux Mint : paquet .deb. Fedora, openSUSE : paquet .rpm.</p>
+      <a class="kx-bouton" data-kx-lien="deb" href="https://github.com/HadesSama63/kalyptik-office/releases/latest">Télécharger le .deb</a>
+      <a class="kx-bouton kx-second" data-kx-lien="rpm" href="https://github.com/HadesSama63/kalyptik-office/releases/latest">Télécharger le .rpm</a>
+      <p class="kx-detail" data-kx-detail="deb"></p>
+    </div>
+  </div>
+
+  <p class="kx-pied">
+    Une fois installé, Kalyptik Office vous prévient de chaque nouvelle version.
+    Toutes les versions et le code source (licence AGPL v3) :
+    <a href="https://github.com/HadesSama63/kalyptik-office">dépôt GitHub</a>.
+  </p>
+
+  <script>
+  (function () {
+    var racine = document.getElementById('kx-dl');
+    if (!racine) return;
+
+    // Met en avant le système du visiteur
+    var ua = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || navigator.userAgent || '';
+    var os = /win/i.test(ua) ? 'windows' : /mac|iphone|ipad/i.test(ua) ? 'mac' : /linux|x11|cros/i.test(ua) ? 'linux' : '';
+    if (os) {
+      var carte = racine.querySelector('[data-kx-os="' + os + '"]');
+      if (carte) { carte.classList.add('kx-conseille'); carte.parentNode.insertBefore(carte, carte.parentNode.firstChild); }
+    }
+
+    // Fichier le plus récent de chaque type, parmi les dernières versions publiées
+    // (une version peut ne pas contenir tous les systèmes).
+    var types = {
+      windows: /^Kalyptik-.*-x64\.exe$/i,
+      mac: /\.dmg$/i,
+      deb: /\.deb$/i,
+      rpm: /\.rpm$/i
+    };
+    var taille = function (o) { return Math.round(o / 1048576) + ' Mo'; };
+
+    fetch('https://api.github.com/repos/HadesSama63/kalyptik-office/releases?per_page=15', {headers: {Accept: 'application/vnd.github+json'}})
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (versions) {
+        versions = versions.filter(function (v) { return !v.draft && !v.prerelease; });
+        if (versions[0]) racine.querySelector('[data-kx="version"]').textContent = 'Dernière version : ' + versions[0].tag_name.replace(/^v/, '') + '.';
+        Object.keys(types).forEach(function (type) {
+          for (var i = 0; i < versions.length; i++) {
+            var fichier = (versions[i].assets || []).filter(function (a) { return types[type].test(a.name); })[0];
+            if (!fichier) continue;
+            var lien = racine.querySelector('[data-kx-lien="' + type + '"]');
+            if (lien) lien.href = fichier.browser_download_url;
+            var detail = racine.querySelector('[data-kx-detail="' + type + '"]');
+            if (detail) detail.textContent = 'Version ' + versions[i].tag_name.replace(/^v/, '') + ' · ' + taille(fichier.size);
+            break;
+          }
+        });
+      })
+      .catch(function () { /* hors ligne ou limite atteinte : les boutons mènent à la page des versions */ });
+  })();
+  </script>
+</section>

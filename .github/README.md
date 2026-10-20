@@ -1,5 +1,5 @@
 [![Licence](https://img.shields.io/badge/Licence-GNU%20AGPL%20V3-green.svg?style=flat)](https://www.gnu.org/licenses/agpl-3.0.fr.html)
-![Plateformes Windows | Linux](https://img.shields.io/badge/Plateformes-Windows%20%7C%20Linux-lightgrey.svg?style=flat)
+![Plateformes Windows | macOS | Linux](https://img.shields.io/badge/Plateformes-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg?style=flat)
 
 ## Bienvenue dans le dépôt de Kalyptik Office !
 
@@ -62,16 +62,17 @@ Les personnalisations de Kalyptik Office sont regroupées dans le dossier [`kaly
 
 ## Installation 💾
 
-Téléchargez la dernière version sur la page des [versions publiées](https://github.com/HadesSama63/kalyptik-office/releases/latest) :
+Téléchargez la dernière version sur [kalyptik.com](https://kalyptik.com) ou sur la page des [versions publiées](https://github.com/HadesSama63/kalyptik-office/releases) :
 
 * **Windows** : l'installeur `Kalyptik-Office-<version>-x64.exe`
+* **macOS** (Mac avec puce Apple) : l'image `Kalyptik-Office-<version>-macos-arm64.dmg`, signée et notarisée par Apple
 * **Linux** : le paquet `.deb` (Debian, Ubuntu) ou `.rpm` (Fedora, openSUSE)
 
 Une fois installé, Kalyptik Office vous prévient lui-même à chaque nouvelle version.
 
 ## Compiler vous-même 🛠️
 
-Kalyptik Office se compile depuis les sources sous **Windows** et **Linux**. C'est un super-dépôt : la première étape consiste toujours à récupérer les sous-modules, puis à appliquer les personnalisations Kalyptik :
+Kalyptik Office se compile depuis les sources sous **Windows**, **Linux** et **macOS** (voir [kalyptik/macos/](../kalyptik/macos/README.md)). C'est un super-dépôt : la première étape consiste toujours à récupérer les sous-modules, puis à appliquer les personnalisations Kalyptik :
 
 ```sh
 git clone https://github.com/HadesSama63/kalyptik-office.git

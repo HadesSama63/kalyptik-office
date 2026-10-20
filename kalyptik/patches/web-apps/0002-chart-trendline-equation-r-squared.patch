@@ -8,7 +8,7 @@ index e2eab11753..451fa44fc0 100644
                      break;
 +                case 'trendLineEquationAndRSquared':
 +                    if (!chartProps.setDisplayTrendlineEquationAndRSquared(true)) {
-+                        Common.UI.warning({msg: _СhartSettingsDlg_view.textEquationAndRSquaredMovingAverageWarning});
++                        Common.UI.warning({msg: SSE.Views.ChartSettingsDlg.prototype.textEquationAndRSquaredMovingAverageWarning});
 +                    }
 +                    break;
                  case 'bShowUpDownBars':
@@ -39,7 +39,7 @@ index 938c4569b2..5b8f660414 100644
                                          value: 'trendLineMovingAverage'
 +                                    },
 +                                    {
-+                                        caption: _СhartSettingsDlg_view.textShowEquationAndRSquared,
++                                        caption: SSE.Views.ChartSettingsDlg.prototype.textShowEquationAndRSquared,
 +                                        stopPropagation: true,
 +                                        value: 'trendLineEquationAndRSquared'
                                      }

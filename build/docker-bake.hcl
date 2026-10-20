@@ -1,8 +1,12 @@
 # docker-bake.hcl
 
-variable "GIT_COMMIT" {
+variable "BUILD_COMMITS" {
   default = ""
-} 
+}
+
+variable "BUILD_DATE" {
+  default = ""
+}
 
 variable "REGISTRY" {
   default = "ghcr.io/euro-office"
@@ -77,6 +81,8 @@ target "_common" {
   args = {
     PRODUCT_VERSION     = "${PRODUCT_VERSION}"
     BUILD_NUMBER        = "${BUILD_NUMBER}"
+    BUILD_COMMITS       = "${BUILD_COMMITS}"
+    BUILD_DATE          = "${BUILD_DATE}"
     BUILD_ROOT          = "${BUILD_ROOT}"
     NUGET_CACHE         = "${NUGET_CACHE}"
     CACHE_BUST          = "${CACHE_BUST}"
@@ -90,6 +96,14 @@ target "_common" {
 # ──────────────────────────────────────────────
 # DEPENDENCY TARGETS
 # ──────────────────────────────────────────────
+
+target "brand-icons" {
+  ## dummy image that contains no brand,
+  ## so default brand is applied implicitly.
+  ## needs workdir as scratch is otherwise 
+  ## non-existent
+  dockerfile-inline = "FROM scratch\nWORKDIR /keep"
+}
 
 target "core-wasm" {
   inherits   = ["_common"]
@@ -147,10 +161,11 @@ target "desktop-common" {
     desktop-js      = "target:desktop-js"       #   even in stages before desktop-common
     sdkjs-desktop   = "target:sdkjs-desktop"
     web-apps        = "target:web-apps"
+    brand-icons   = "target:brand-icons"
   }
 
   # Export the filesystem directly to a local directory instead of an image
   output = ["type=oci,dest=./deploy/common,tar=false"]
 
-  cache-from = ["type=local,src=/tmp/${REGISTRY}/desktop-common"]  # reuses builder cache
+  cache-from = ["type=local,src=./.docker-cache/${REGISTRY}/desktop-common"]  # reuses builder cache
 }

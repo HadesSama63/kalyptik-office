@@ -1,8 +1,8 @@
 diff --git a/win-linux/CMakeLists.txt b/win-linux/CMakeLists.txt
-index b256bac..c170a14 100644
+index 7cb57390d..82c0d01a7 100644
 --- a/win-linux/CMakeLists.txt
 +++ b/win-linux/CMakeLists.txt
-@@ -521,6 +521,31 @@ install(DIRECTORY "${EO_CORE_OUTPUT_DIR}/"
+@@ -630,6 +630,21 @@ install(DIRECTORY "${EO_CORE_OUTPUT_DIR}/"
      DESTINATION ${CMAKE_INSTALL_BINDIR}/converter
  )
  
@@ -14,9 +14,6 @@ index b256bac..c170a14 100644
 +    )
 +endif()
 +
-+# Kalyptik: app.ico, used by the Windows shortcuts, the uninstaller entry and
-+# notifications ({app}\app.ico in package/inno/common.iss), was never installed:
-+# the shortcuts showed a blank page instead of the application icon.
 +# Kalyptik: bundled free fonts (dyslexia, school) → fonts/, scanned at startup
 +if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/res/kalyptik-fonts")
 +    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/res/kalyptik-fonts/"
@@ -24,13 +21,6 @@ index b256bac..c170a14 100644
 +    )
 +endif()
 +
-+if(WIN32)
-+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/res/icons/desktopeditors-eo.ico"
-+        DESTINATION ${CMAKE_INSTALL_BINDIR}
-+        RENAME app.ico
-+    )
-+endif()
-+
- # Boost: on Windows it's static (linked into the binaries) — nothing to install
- if(NOT WIN32)
-     install(DIRECTORY "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/boost/linux_64/lib/"
+ # Makes converter\ the private "converter" assembly the binaries above depend
+ # on; without it they fail with 0xC0150002 (STATUS_SXS_CANT_GEN_ACTCTX)
+ if(WIN32)

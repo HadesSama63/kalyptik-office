@@ -57,6 +57,19 @@ variable "PRODUCT_NAME" {
   default = "Desktop Editors"
 }
 
+# Maintainer/Vendor written into the .deb/.rpm metadata.
+variable "PUBLISHER_NAME" {
+  default = "Euro-Office"
+}
+
+variable "PUBLISHER_URL" {
+  default = "https://github.com/Euro-Office/DesktopEditors"
+}
+
+variable "SUPPORT_MAIL" {
+  default = ""
+}
+
 # ──────────────────────────────────────────────
 # BUILD GROUPS
 # ──────────────────────────────────────────────
@@ -88,6 +101,13 @@ target "_common" {
 # DEPENDENCY TARGETS
 # ──────────────────────────────────────────────
 
+target "brand-icons" {
+  ## dummy image that contains no brand,
+  ## so default brand is applied implicitly.
+  ## needs workdir as scratch is otherwise 
+  ## non-existent
+  dockerfile-inline = "FROM scratch\nWORKDIR /keep"
+}
 
 target "core-base" {
   inherits   = ["_common"]
@@ -98,8 +118,8 @@ target "core-base" {
   dockerfile = "./core/.docker/core.bake.Dockerfile"
   target     = "core-base"
   tags       = ["${REGISTRY}/core-base:${TAG}"]
-  cache-from = ["type=local,src=/tmp/${REGISTRY}/core-base"]
-  cache-to   = ["type=local,dest=/tmp/${REGISTRY}/core-base,mode=max"]
+  cache-from = ["type=local,src=./.docker-cache/${REGISTRY}/core-base"]
+  cache-to   = ["type=local,dest=./.docker-cache/${REGISTRY}/core-base,mode=max"]
 }
 
 # ──────────────────────────────────────────────
@@ -115,13 +135,14 @@ target "desktop-linux" {
   contexts = {
     desktop-common  = "oci-layout://../deploy/common:${TAG}"
     core-base       = "target:core-base"
+    brand-icons   = "target:brand-icons"
   }
   secret = [
     "id=nextcloud_user,env=NEXTCLOUD_USER",
     "id=nextcloud_pass,env=NEXTCLOUD_PASS",
   ]
-  cache-from = ["type=local,src=/tmp/${REGISTRY}/desktop-linux"]
-  cache-to   = ["type=local,dest=/tmp/${REGISTRY}/desktop-linux,mode=max"]
+  cache-from = ["type=local,src=./.docker-cache/${REGISTRY}/desktop-linux"]
+  cache-to   = ["type=local,dest=./.docker-cache/${REGISTRY}/desktop-linux,mode=max"]
 }
 
 # ──────────────────────────────────────────────
@@ -134,12 +155,20 @@ target "packages" {
   dockerfile = "./build/.docker/packages.bake.Dockerfile"
   target     = "packages"       # points to the FROM scratch stage
   tags       = ["${REGISTRY}/packages:${TAG}"]
+  # Only the packaging step reads these, so they stay out of _common and
+  # don't invalidate the compile targets' cache.
+  args = {
+    PUBLISHER_NAME = "${PUBLISHER_NAME}"
+    PUBLISHER_URL  = "${PUBLISHER_URL}"
+    SUPPORT_MAIL   = "${SUPPORT_MAIL}"
+  }
   contexts = {
-    desktop-linux          = "target:desktop-linux"
+    desktop-linux = "target:desktop-linux"
+    brand-icons   = "target:brand-icons"
   }
 
   # Export the filesystem directly to a local directory instead of an image
   output = ["type=local,dest=./deploy/packages"]
 
-  cache-from = ["type=local,src=/tmp/${REGISTRY}/packages"]  # reuses builder cache
+  cache-from = ["type=local,src=./.docker-cache/${REGISTRY}/packages"]  # reuses builder cache
 }

@@ -1,3 +1,5 @@
 .docker-cache/
+.vscode/
 build_output.log
 build/kalyptik-plugins/
+build/deploy/

@@ -27,7 +27,7 @@ permissions:
   contents: read
 
 env:
-  PRODUCT_VERSION: 9.3.1
+  PRODUCT_VERSION: 9.3.5   # = VERSION.txt d'Euro-Office
   BUILD_NUMBER: kalyptik.${{ github.run_number }}
   BUILD_ROOT: /package
   COMPANY_NAME: Kalyptik
@@ -201,6 +201,9 @@ jobs:
         env:
           GIT_COMMIT: ${{ github.sha }}
           NUGET_CACHE: local
+          # mainteneur / éditeur inscrit dans les paquets .deb et .rpm
+          PUBLISHER_NAME: Kalyptik
+          PUBLISHER_URL: https://kalyptik.com
 
       - name: État de la machine (diagnostic)
         if: always()

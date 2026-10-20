@@ -27,5 +27,13 @@
   "Find optimal solutions for complex calculations.": "Trouvez la solution optimale de calculs complexes.",
   "Solver": "Solveur",
   "Easily access all options for working with sheets, rows, and columns.": "Accédez facilement à toutes les options des feuilles, lignes et colonnes.",
-  "New button: Format": "Nouveau bouton : Format"
+  "New button: Format": "Nouveau bouton : Format",
+  "Ask Nextcloud Assistant": "Demander à l'assistant Nextcloud",
+  "Smart Picker": "Sélecteur intelligent",
+  "Cell reference": "Référence de cellule",
+  "The cell will display TRUE or FALSE depending on the checked state of the checkbox.": "La cellule affichera VRAI ou FAUX selon que la case est cochée ou non.",
+  "ERROR! Invalid cell reference": "ERREUR ! Référence de cellule non valide",
+  "Link Cell": "Cellule liée",
+  "Check box": "Case à cocher",
+  "Insert checkbox": "Insérer une case à cocher"
 }

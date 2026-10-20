@@ -40,12 +40,12 @@ RULES = [
     (DEFINES, '# define APP_DATA_PATH "/euro-office/desktopeditors"', '# define APP_DATA_PATH "/kalyptik/office"'),
     (DEFINES, '# define REG_GROUP_KEY "euro-office"', '# define REG_GROUP_KEY "kalyptik"'),
     (DEFINES, '# define APP_MUTEX_NAME "asc:editors"', '# define APP_MUTEX_NAME "kalyptik:office"'),
-    (DEFINES, '# define DESKTOP_FILE_NAME "eurooffice-desktopeditors"', '# define DESKTOP_FILE_NAME "kalyptik-office"'),
+    (DEFINES, '#  define DESKTOP_FILE_NAME "euro-office-desktopeditors"', '#  define DESKTOP_FILE_NAME "kalyptik-office"'),
     (DEFINES, '# define APP_DATA_PATH "/Euro-Office/DesktopEditors"', '# define APP_DATA_PATH "/Kalyptik/DesktopEditors"'),
     (DEFINES, '# define APP_REG_NAME  "Euro-Office"', '# define APP_REG_NAME  "Kalyptik"'),
     (DEFINES, '# define REG_GROUP_KEY "Euro-Office"', '# define REG_GROUP_KEY "Kalyptik"'),
     (DEFINES, '# define REG_UNINST_KEY "Euro-Office Desktop Editors"', f'# define REG_UNINST_KEY "{SUITE}"'),
-    (DEFINES, '# define APP_MUTEX_NAME "TEAMLAB"', '# define APP_MUTEX_NAME "KALYPTIK_OFFICE"'),
+    (DEFINES, '# define APP_MUTEX_NAME "EuroOffice-DesktopEditors"', '# define APP_MUTEX_NAME "KALYPTIK_OFFICE"'),
     (DEFINES, '#define WINDOW_NAME "Euro-Office"', f'#define WINDOW_NAME "{SUITE}"'),
     (DEFINES, '#define APP_USER_MODEL_ID "ASC.Documents.5"', '#define APP_USER_MODEL_ID "Kalyptik.Office.1"'),
     (DEFINES, '#define APP_SIMPLE_WINDOW_TITLE "Euro-Office Editor"', f'#define APP_SIMPLE_WINDOW_TITLE "{SUITE}"'),
@@ -60,8 +60,8 @@ RULES = [
     (INNO_COMMON, "Name: de; MessagesFile: compiler:Languages\\German.isl;\nName: fr; MessagesFile: compiler:Languages\\French.isl;\n",
                   "Name: de; MessagesFile: compiler:Languages\\German.isl;\n"),
     # Fichiers verrouillés (erreur 32) : Inno repère aussi qui bloque les dictionnaires…
-    (INNO_COMMON, "SetupMutex                =ASC",
-                  "SetupMutex                =ASC\n"
+    (INNO_COMMON, "SetupMutex                =EuroOffice-DesktopEditors-Setup",
+                  "SetupMutex                =Kalyptik-Office-Setup\n"
                   "CloseApplicationsFilter   =*.exe,*.dll,*.chm,*.dic,*.aff"),
     # … et ferme, après confirmation, les processus encore lancés depuis le dossier
     # de l'application (editors.exe, editors_helper.exe…), avant de copier les fichiers.
@@ -149,7 +149,7 @@ RULES = [
     (VERSION, '#define VER_PRODUCTNAME_STR         "Euro-Office\\0"', f'#define VER_PRODUCTNAME_STR         "{SUITE}\\0"'),
 
     # --- Fenêtre « À propos » (Linux : ABOUT_PAGE_APP_NAME vient de COMPANY_NAME/PRODUCT_NAME)
-    ("build/windows/build.ps1", "'-DABOUT_PAGE_APP_NAME=Desktop Editors'", f"'-DABOUT_PAGE_APP_NAME={SUITE}'"),
+    ("build/windows/build.ps1", '$env:ABOUT_PAGE_APP_NAME  = "$ProductName"', '$env:ABOUT_PAGE_APP_NAME  = "$CompanyName $ProductName"'),
     ("desktop-apps/win-linux/src/prop/cmainwindowimpl.cpp",
      '_json_obj["appname"]    = "Euro-Office Desktop Editors";', f'_json_obj["appname"]    = "{SUITE}";'),
 
@@ -158,11 +158,12 @@ RULES = [
     (INNO, '#define sCompanyName                    "Euro-Office"', '#define sCompanyName                    "Kalyptik"'),
     (INNO, '#define sProductName                    "Desktop Editors"', '#define sProductName                    "Office"'),
     (INNO, '#define sAppName                        str(sCompanyName)', f'#define sAppName                        "{SUITE}"'),
-    (INNO, '#define sAppPublisherURL                "https://www.onlyoffice.com/"', f'#define sAppPublisherURL                "{SITE}"'),
-    (INNO, '#define sAppSupportURL                  "https://www.onlyoffice.com/support.aspx"', f'#define sAppSupportURL                  "{SITE}"'),
+    (INNO, '#define sAppPublisher                   "Euro-Office"', '#define sAppPublisher                   "Kalyptik"'),
+    (INNO, '#define sAppPublisherURL                "https://github.com/Euro-Office/DesktopEditors"', f'#define sAppPublisherURL                "{SITE}"'),
+    (INNO, '#define sAppSupportURL                  "https://github.com/Euro-Office/DesktopEditors/issues"', f'#define sAppSupportURL                  "{SITE}"'),
     (INNO, '#define sAppIconName                    "Euro-Office"', f'#define sAppIconName                    "{SUITE}"'),
     (INNO, '#define APP_USER_MODEL_ID               "ASC.Documents.5"', '#define APP_USER_MODEL_ID               "Kalyptik.Office.1"'),
-    (INNO, '#define APP_MUTEX_NAME                  "TEAMLAB"', '#define APP_MUTEX_NAME                  "KALYPTIK_OFFICE"'),
+    (INNO, '#define APP_MUTEX_NAME                  "EuroOffice-DesktopEditors"', '#define APP_MUTEX_NAME                  "KALYPTIK_OFFICE"'),
     (INNO, '#define ASSC_APP_NAME                   "Euro-Office"', f'#define ASSC_APP_NAME                   "{SUITE}"'),
     (INNO, '#define ASCC_REG_REGISTERED_APP_NAME    "Euro-Office Editors"', f'#define ASCC_REG_REGISTERED_APP_NAME    "{SUITE}"'),
     (INNO, '#define ASSOC_APP_FRIENDLY_NAME         "Euro-Office Editors"', f'#define ASSOC_APP_FRIENDLY_NAME         "{SUITE}"'),

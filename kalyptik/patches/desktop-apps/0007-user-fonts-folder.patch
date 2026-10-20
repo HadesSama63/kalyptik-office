@@ -1,5 +1,5 @@
 diff --git a/win-linux/src/main.cpp b/win-linux/src/main.cpp
-index 271f9e0..57ab626 100644
+index 74aea2161..12983d567 100644
 --- a/win-linux/src/main.cpp
 +++ b/win-linux/src/main.cpp
 @@ -40,6 +40,8 @@
@@ -8,10 +8,10 @@ index 271f9e0..57ab626 100644
  #include <QStyleFactory>
 +#include <QDir>
 +#include <QFileInfo>
- 
- 
- int main( int argc, char *argv[] )
-@@ -106,6 +108,13 @@ int main( int argc, char *argv[] )
+ #include <vector>
+ #include <QGuiApplication>
+ #include <QDebug>
+@@ -165,6 +167,13 @@ int main( int argc, char *argv[] )
          manager->m_oSettings.local_editors_path         = app_path + L"/editors/web-apps/apps/api/documents/index.html";
          manager->m_oSettings.system_templates_path      = app_path  + L"/converter/templates";
          manager->m_oSettings.additional_fonts_folder.push_back(app_path + L"/fonts");

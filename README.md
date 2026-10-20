@@ -47,9 +47,17 @@ Desktop Editors contain the following components:
 * [web-apps](https://github.com/Euro-Office/web-apps) - the frontend for [Document Server][1] which is a part of Desktop Editors that allows the user to create, edit, save and export text, spreadsheet and presentation documents using the common interface of a document editor.
 * [dictionaries](https://github.com/Euro-Office/dictionaries) - the dictionaries of various languages used for spellchecking in Desktop Editors.
 
+## Install 💾
+
+Signed builds are available as **Nextcloud Office**, which also offers APT and DNF package repositories. Unsigned community builds are published on the [releases](https://github.com/Euro-Office/DesktopEditors/releases/latest) page of this repository.
+
+[Download Nextcloud Office Desktop Editors](https://github.com/nextcloud-releases/Office-DesktopEditors/releases/latest)
+
+See the [installation guide](https://euro-office.github.io/documentation/installation/) in the [official documentation](https://euro-office.github.io/documentation/) for details.
+
 ## Build it yourself 🛠️
 
-You can build Desktop Editors from source on **Windows** and **Linux**. This is a
+You can build Desktop Editors from source on **Windows**, **Linux**, and **macOS**. This is a
 super-repository, so the first step is always to check out the submodules:
 
 ```sh
@@ -64,6 +72,7 @@ Then head to the build docs:
   shared CMake definition, the common editors payload, vcpkg, and caching).
 * **[build/windows/](./build/windows/README.md)** — the Windows build (`build.ps1`, MSVC + CMake).
 * **[build/linux/](./build/linux/README.md)** — the Linux build (Docker / `docker buildx bake`).
+* **[build/macos/](./build/macos/README.md)** — the macOS build (native CMake + Xcode).
 
 ## Get involved 🤝
 
